@@ -150,13 +150,14 @@ export function MasterDashboardPage() {
                   aria-invalid={!!errors.nome}
                   {...register("nome")}
                   onChange={onNomeChange}
+                  className="bg-white"
                 />
                 {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="email">E-mail</Label>
-                <Input id="email" type="email" placeholder="email@exemplo.com" aria-invalid={!!errors.email} {...register("email")} />
+                <Input id="email" type="email" placeholder="email@exemplo.com" aria-invalid={!!errors.email} {...register("email")} className="bg-white"/>
                 {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
               </div>
 
@@ -174,7 +175,7 @@ export function MasterDashboardPage() {
                   <Input
                     id="slug"
                     placeholder="nome-do-negocio"
-                    className="border-0 rounded-none focus-visible:ring-0"
+                    className="border-0 rounded-none focus-visible:ring-0 bg-white"
                     aria-invalid={!!errors.slug}
                     {...register("slug")}
                   />
@@ -184,13 +185,13 @@ export function MasterDashboardPage() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="senha">Senha temporária</Label>
-                <Input id="senha" type="password" placeholder="Mín. 8 chars, 1 maiúscula, 1 número" aria-invalid={!!errors.senha} {...register("senha")} />
+                <Input id="senha" type="password" placeholder="Mín. 8 chars, 1 maiúscula, 1 número" aria-invalid={!!errors.senha} {...register("senha")} className="bg-white"/>
                 {errors.senha && <p className="text-xs text-destructive">{errors.senha.message}</p>}
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="whatsapp_contato">WhatsApp</Label>
-                <Input id="whatsapp_contato" placeholder="(63) 99999-9999" aria-invalid={!!errors.whatsapp_contato} {...register("whatsapp_contato")} />
+                <Input id="whatsapp_contato" placeholder="(63) 99999-9999" aria-invalid={!!errors.whatsapp_contato} {...register("whatsapp_contato")} className="bg-white"/>
                 {errors.whatsapp_contato && (
                   <p className="text-xs text-destructive">{errors.whatsapp_contato.message}</p>
                 )}

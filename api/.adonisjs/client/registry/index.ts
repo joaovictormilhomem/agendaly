@@ -1,0 +1,47 @@
+/* eslint-disable prettier/prettier */
+import type { AdonisEndpoint } from '@tuyau/core/types'
+import type { Registry } from './schema.d.ts'
+import type { ApiDefinition } from './tree.d.ts'
+
+const placeholder: any = {}
+
+const routes = {
+  'auth.login': {
+    methods: ["POST"],
+    pattern: '/api/login',
+    tokens: [{"old":"/api/login","type":0,"val":"api","end":""},{"old":"/api/login","type":0,"val":"login","end":""}],
+    types: placeholder as Registry['auth.login']['types'],
+  },
+  'auth.refresh': {
+    methods: ["POST"],
+    pattern: '/api/refresh',
+    tokens: [{"old":"/api/refresh","type":0,"val":"api","end":""},{"old":"/api/refresh","type":0,"val":"refresh","end":""}],
+    types: placeholder as Registry['auth.refresh']['types'],
+  },
+  'auth.logout': {
+    methods: ["POST"],
+    pattern: '/api/logout',
+    tokens: [{"old":"/api/logout","type":0,"val":"api","end":""},{"old":"/api/logout","type":0,"val":"logout","end":""}],
+    types: placeholder as Registry['auth.logout']['types'],
+  },
+  'users.store': {
+    methods: ["POST"],
+    pattern: '/api/users',
+    tokens: [{"old":"/api/users","type":0,"val":"api","end":""},{"old":"/api/users","type":0,"val":"users","end":""}],
+    types: placeholder as Registry['users.store']['types'],
+  },
+} as const satisfies Record<string, AdonisEndpoint>
+
+export { routes }
+
+export const registry = {
+  routes,
+  $tree: {} as ApiDefinition,
+}
+
+declare module '@tuyau/core/types' {
+  export interface UserRegistry {
+    routes: typeof routes
+    $tree: ApiDefinition
+  }
+}

@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/table"
 import { listProfissionais, createProfissional, impersonateProfissional } from "@/api/master/profissionais"
 import { useAuth } from "@/hooks/useAuth"
-import type { CreateProfissionalRequest } from "@/types/profissional"
+import type { CreateProfissionalRequest, Profissional } from "@/types/profissional"
 
 const createSchema = z.object({
   nome: z.string().min(2, "Nome obrigatório"),
@@ -80,8 +80,8 @@ export function MasterDashboardPage() {
   })
 
   const impersonateMutation = useMutation({
-    mutationFn: (slug: string) => impersonateProfissional(slug),
-    onSuccess: ({ token, profissional }) => {
+    mutationFn: (profissional: Profissional) => impersonateProfissional(profissional.slug),
+    onSuccess: ({ token }, profissional) => {
       startImpersonation(profissional, token)
       navigate(`/admin/${profissional.slug}/dashboard`)
     },
@@ -126,7 +126,7 @@ export function MasterDashboardPage() {
             placeholder="Buscar por nome ou e-mail…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 bg-white"
           />
         </div>
 
@@ -256,7 +256,7 @@ export function MasterDashboardPage() {
                       variant="outline"
                       className="gap-1.5 text-xs"
                       disabled={impersonateMutation.isPending}
-                      onClick={() => impersonateMutation.mutate(p.slug)}
+                      onClick={() => impersonateMutation.mutate(p)}
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                       Acessar Painel

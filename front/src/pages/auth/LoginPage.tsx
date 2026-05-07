@@ -37,8 +37,8 @@ export function LoginPage() {
 
   const mutation = useMutation({
     mutationFn: loginUser,
-    onSuccess: ({ token, user }) => {
-      login(token, user)
+    onSuccess: ({ token, refresh_token, user }) => {
+      login(token, refresh_token, user)
       if (user.role === "SUPERADMIN") {
         navigate("/master/dashboard")
       } else {

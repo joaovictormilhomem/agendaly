@@ -7,16 +7,21 @@ export type ScannedRoutes = {
     'auth.login': { paramsTuple?: []; params?: {} }
     'auth.refresh': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
+    'users.index': { paramsTuple?: []; params?: {} }
+    'users.impersonate': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
   }
   GET: {
+    'users.index': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
+    'users.index': { paramsTuple?: []; params?: {} }
   }
   POST: {
     'auth.login': { paramsTuple?: []; params?: {} }
     'auth.refresh': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
+    'users.impersonate': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
   }
 }

@@ -17,5 +17,4 @@ export interface CreateProfissionalRequest {
 
 export interface ImpersonateResponse {
   token: string
-  profissional: Profissional
 }

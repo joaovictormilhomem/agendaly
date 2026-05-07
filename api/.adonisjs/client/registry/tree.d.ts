@@ -8,6 +8,8 @@ export interface ApiDefinition {
     logout: typeof routes['auth.logout']
   }
   users: {
+    index: typeof routes['users.index']
+    impersonate: typeof routes['users.impersonate']
     store: typeof routes['users.store']
   }
 }

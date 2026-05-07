@@ -32,6 +32,16 @@ router.get('/api/me', async ({ authJwt, response }) => {
 }).use(middleware.jwtAuth())
 
 router
+  .get('/api/users', [UsersController, 'index'])
+  .use(middleware.jwtAuth())
+  .use(middleware.superadmin())
+
+router
+  .post('/api/users/impersonate/:slug', [UsersController, 'impersonate'])
+  .use(middleware.jwtAuth())
+  .use(middleware.superadmin())
+
+router
   .post('/api/users', [UsersController, 'store'])
   .use(middleware.jwtAuth())
   .use(middleware.superadmin())

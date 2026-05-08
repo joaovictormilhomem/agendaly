@@ -5,16 +5,19 @@ import type { Profissional } from "@/types/profissional"
 
 interface ImpersonationState {
   originalToken: string
+  originalRefreshToken: string | null
   originalUser: AuthUser
   target: Profissional
 }
 
 interface AuthState {
   token: string | null
+  refreshToken: string | null
   user: AuthUser | null
   impersonating: ImpersonationState | null
 
-  login: (token: string, user: AuthUser) => void
+  login: (token: string, refreshToken: string, user: AuthUser) => void
+  setTokens: (token: string, refreshToken: string) => void
   logout: () => void
   startImpersonation: (target: Profissional, secondaryToken: string) => void
   stopImpersonation: () => void
@@ -24,19 +27,23 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       token: null,
+      refreshToken: null,
       user: null,
       impersonating: null,
 
-      login: (token, user) => set({ token, user, impersonating: null }),
+      login: (token, refreshToken, user) => set({ token, refreshToken, user, impersonating: null }),
 
-      logout: () => set({ token: null, user: null, impersonating: null }),
+      setTokens: (token, refreshToken) => set({ token, refreshToken }),
+
+      logout: () => set({ token: null, refreshToken: null, user: null, impersonating: null }),
 
       startImpersonation: (target, secondaryToken) => {
-        const { token, user } = get()
+        const { token, refreshToken, user } = get()
         if (!token || !user) return
         set({
-          impersonating: { originalToken: token, originalUser: user, target },
+          impersonating: { originalToken: token, originalRefreshToken: refreshToken, originalUser: user, target },
           token: secondaryToken,
+          refreshToken: null,
           user: {
             id: target.id,
             nome: target.nome,
@@ -52,6 +59,7 @@ export const useAuthStore = create<AuthState>()(
         if (!impersonating) return
         set({
           token: impersonating.originalToken,
+          refreshToken: impersonating.originalRefreshToken,
           user: impersonating.originalUser,
           impersonating: null,
         })
@@ -61,6 +69,7 @@ export const useAuthStore = create<AuthState>()(
       name: "agendaly-auth",
       partialize: (state) => ({
         token: state.token,
+        refreshToken: state.refreshToken,
         user: state.user,
         impersonating: state.impersonating,
       }),

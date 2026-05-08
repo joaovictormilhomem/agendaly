@@ -24,6 +24,18 @@ const routes = {
     tokens: [{"old":"/api/logout","type":0,"val":"api","end":""},{"old":"/api/logout","type":0,"val":"logout","end":""}],
     types: placeholder as Registry['auth.logout']['types'],
   },
+  'users.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/users',
+    tokens: [{"old":"/api/users","type":0,"val":"api","end":""},{"old":"/api/users","type":0,"val":"users","end":""}],
+    types: placeholder as Registry['users.index']['types'],
+  },
+  'users.impersonate': {
+    methods: ["POST"],
+    pattern: '/api/users/impersonate/:slug',
+    tokens: [{"old":"/api/users/impersonate/:slug","type":0,"val":"api","end":""},{"old":"/api/users/impersonate/:slug","type":0,"val":"users","end":""},{"old":"/api/users/impersonate/:slug","type":0,"val":"impersonate","end":""},{"old":"/api/users/impersonate/:slug","type":1,"val":"slug","end":""}],
+    types: placeholder as Registry['users.impersonate']['types'],
+  },
   'users.store': {
     methods: ["POST"],
     pattern: '/api/users',

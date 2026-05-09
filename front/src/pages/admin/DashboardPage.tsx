@@ -1,16 +1,18 @@
 import { useQuery } from "@tanstack/react-query"
-import { useParams } from "react-router-dom"
-import { Clock, Scissors, Settings, ChevronRight } from "lucide-react"
+import { useParams, useNavigate } from "react-router-dom"
+import { Clock, Scissors, Settings, ChevronRight, X, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { getDashboard } from "@/api/admin/agenda"
+import { getPerfil } from "@/api/admin/perfil"
 import { useAuth } from "@/hooks/useAuth"
 import { StatusChip } from "@/components/shared/StatusChip"
 import { cn } from "@/lib/utils"
 import type { Agendamento } from "@/types/agenda"
+import { useState } from "react"
 
 function greeting() {
   const h = new Date().getHours()
@@ -78,17 +80,55 @@ function AgendamentoRow({ item }: { item: Agendamento }) {
 export function DashboardPage() {
   const { slug } = useParams<{ slug: string }>()
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const [bannerDismissed, setBannerDismissed] = useState(false)
+
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard", slug],
     queryFn: () => getDashboard(slug!),
     enabled: !!slug,
   })
 
+  const { data: perfil } = useQuery({
+    queryKey: ["perfil", slug],
+    queryFn: () => getPerfil(slug!),
+    enabled: !!slug,
+  })
+
   const proximo = data?.proximo_atendimento
   const mins = proximo ? minutesUntil(proximo.data_hora_inicio) : null
+  const showBanner = !bannerDismissed && perfil?.primeira_visita === true
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* First-visit pending banner */}
+      {showBanner && (
+        <div className="flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 p-4">
+          <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">Você tem pendências antes de publicar sua página</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Recomendamos que você <span className="font-medium text-foreground">altere sua senha</span> no primeiro acesso e{" "}
+              <button
+                type="button"
+                onClick={() => navigate(`/admin/${slug}/personalizar`)}
+                className="font-medium text-amber-700 underline underline-offset-2 hover:text-amber-800"
+              >
+                personalize sua página
+              </button>{" "}
+              antes de compartilhar com seus clientes.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setBannerDismissed(true)}
+            className="text-muted-foreground hover:text-foreground shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         {isLoading ? (

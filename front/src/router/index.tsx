@@ -5,6 +5,7 @@ import { MasterLayout } from "@/layouts/MasterLayout"
 import { LoginPage } from "@/pages/auth/LoginPage"
 import { MasterDashboardPage } from "@/pages/master/MasterDashboardPage"
 import { DashboardPage } from "@/pages/admin/DashboardPage"
+import { PersonalizarPage } from "@/pages/admin/PersonalizarPage"
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
           { path: "dashboard", element: <DashboardPage /> },
+          { path: "personalizar", element: <PersonalizarPage /> },
         ],
       },
     ],

@@ -206,15 +206,15 @@ export function DashboardPage() {
               <CardTitle className="text-base font-semibold font-playfair">Ações rápidas</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-center gap-2 text-sm rounded-full bg-white hover:bg-accent" style={{ color: "#2C2025" }}>
+              <Button variant="outline" className="w-full justify-center gap-2 text-sm rounded-full bg-white hover:bg-accent" style={{ color: "#2C2025" }} onClick={() => navigate(`/admin/${slug}/servicos`)}>
                 <Scissors className="h-4 w-4 text-primary" />
                 Gerenciar serviços
               </Button>
-              <Button variant="outline" className="w-full justify-center gap-2 text-sm rounded-full bg-white hover:bg-accent" style={{ color: "#2C2025" }}>
+              <Button variant="outline" className="w-full justify-center gap-2 text-sm rounded-full bg-white hover:bg-accent" style={{ color: "#2C2025" }} onClick={() => navigate(`/admin/${slug}/disponibilidade`)}>
                 <Clock className="h-4 w-4 text-primary" />
                 Configurar disponibilidade
               </Button>
-              <Button variant="outline" className="w-full justify-center gap-2 text-sm rounded-full bg-white hover:bg-accent" style={{ color: "#2C2025" }}>
+              <Button variant="outline" className="w-full justify-center gap-2 text-sm rounded-full bg-white hover:bg-accent" style={{ color: "#2C2025" }} onClick={() => navigate(`/admin/${slug}/personalizar`)}>
                 <Settings className="h-4 w-4 text-primary" />
                 Personalizar página
               </Button>

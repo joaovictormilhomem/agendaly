@@ -105,7 +105,7 @@ export function PersonalizarPage() {
   const onSubmit = (values: PerfilFormValues) => publicar(values)
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-5xl">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -143,7 +143,7 @@ export function PersonalizarPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Tabs defaultValue="identidade">
-            <TabsList className="mb-6 bg-transparent border-b border-border rounded-none w-full justify-start gap-1 h-auto px-0 pb-0 pt-0">
+            <TabsList className="mb-6 bg-transparent border-b-2 border-border rounded-none w-full justify-start gap-1 h-auto px-0 pb-0 pt-0 max-w-2xl" >
               {(["identidade", "hero", "portfolio", "contato", "tema"] as const).map((tab) => (
                 <TabsTrigger
                   key={tab}
@@ -159,25 +159,27 @@ export function PersonalizarPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="identidade">
-              <IdentidadeTab control={form.control} slug={slug ?? ""} />
-            </TabsContent>
+            <div className="max-w-2xl">
+              <TabsContent value="identidade">
+                <IdentidadeTab control={form.control} slug={slug ?? ""} />
+              </TabsContent>
 
-            <TabsContent value="hero">
-              <HeroTab control={form.control} />
-            </TabsContent>
+              <TabsContent value="hero">
+                <HeroTab control={form.control} />
+              </TabsContent>
 
-            <TabsContent value="portfolio">
-              <PortfolioTab />
-            </TabsContent>
+              <TabsContent value="portfolio">
+                <PortfolioTab />
+              </TabsContent>
 
-            <TabsContent value="contato">
-              <ContatoTab control={form.control} />
-            </TabsContent>
+              <TabsContent value="contato">
+                <ContatoTab control={form.control} />
+              </TabsContent>
 
-            <TabsContent value="tema">
-              <TemaTab control={form.control} />
-            </TabsContent>
+              <TabsContent value="tema">
+                <TemaTab control={form.control} />
+              </TabsContent>
+            </div>
           </Tabs>
         </form>
       </Form>

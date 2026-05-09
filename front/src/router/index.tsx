@@ -6,6 +6,8 @@ import { LoginPage } from "@/pages/auth/LoginPage"
 import { MasterDashboardPage } from "@/pages/master/MasterDashboardPage"
 import { DashboardPage } from "@/pages/admin/DashboardPage"
 import { PersonalizarPage } from "@/pages/admin/PersonalizarPage"
+import { ServicosPage } from "@/pages/admin/ServicosPage"
+import { DisponibilidadePage } from "@/pages/admin/DisponibilidadePage"
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +36,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
           { path: "dashboard", element: <DashboardPage /> },
+          { path: "servicos", element: <ServicosPage /> },
+          { path: "disponibilidade", element: <DisponibilidadePage /> },
           { path: "personalizar", element: <PersonalizarPage /> },
         ],
       },

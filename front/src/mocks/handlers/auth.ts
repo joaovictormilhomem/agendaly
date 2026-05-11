@@ -26,10 +26,11 @@ export const authHandlers = [
   }),
 
   http.get("/api/me", ({ request }) => {
-    const authHeader = request.headers.get("Authorization")
+    const authHeader = request.headers.get("authorization") || request.headers.get("Authorization")
     const token = authHeader?.replace("Bearer ", "")
     const match = MOCK_USERS.find((u) => u.token === token)
     if (!match) {
+      console.warn(`[MSW] /api/me: no match for token "${token}", auth header: "${authHeader}"`)
       return HttpResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
     return HttpResponse.json(match.me)

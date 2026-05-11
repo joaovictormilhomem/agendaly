@@ -1,3 +1,4 @@
+import axios from "axios"
 import { apiClient } from "./client"
 import type { LoginRequest, LoginResponse, UserRole } from "@/types/auth"
 
@@ -21,9 +22,12 @@ export async function loginUser(data: LoginRequest): Promise<LoginResponse> {
   })
   const { token, refresh_token } = res.data
 
-  const meRes = await apiClient.get<BackendMeResponse>("/api/me", {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const meRes = await axios.get<BackendMeResponse>(
+    `${import.meta.env.VITE_API_BASE_URL || ""}/api/me`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  )
   const { id, role, slug, email, name } = meRes.data
 
   return {

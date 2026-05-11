@@ -85,3 +85,7 @@
 .font-playfair {
   font-family: "Playfair Display", Georgia, serif;
 }
+
+.bg-beige {
+  background-color: var(--background);
+}

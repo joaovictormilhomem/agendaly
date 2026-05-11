@@ -8,6 +8,8 @@ import { DashboardPage } from "@/pages/admin/DashboardPage"
 import { PersonalizarPage } from "@/pages/admin/PersonalizarPage"
 import { ServicosPage } from "@/pages/admin/ServicosPage"
 import { DisponibilidadePage } from "@/pages/admin/DisponibilidadePage"
+import { LandingPage } from "@/pages/public/LandingPage"
+import { AgendarPage } from "@/pages/public/AgendarPage"
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +48,14 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/login" replace />,
+  },
+  {
+    path: ":slug",
+    element: <LandingPage />,
+  },
+  {
+    path: ":slug/agendar",
+    element: <AgendarPage />,
   },
   {
     path: "*",

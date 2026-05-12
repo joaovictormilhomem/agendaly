@@ -175,4 +175,28 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'disponibilidade.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/disponibilidade'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'disponibilidade.update': {
+    methods: ["PUT"]
+    pattern: '/api/admin/:slug/disponibilidade'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
 }

@@ -24,4 +24,8 @@ export interface ApiDefinition {
     update: typeof routes['servicos.update']
     destroy: typeof routes['servicos.destroy']
   }
+  disponibilidade: {
+    show: typeof routes['disponibilidade.show']
+    update: typeof routes['disponibilidade.update']
+  }
 }

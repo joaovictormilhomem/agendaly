@@ -43,6 +43,21 @@ export class AuthSessionSchema extends BaseModel {
   declare userId: string
 }
 
+export class BloqueiosAgendumSchema extends BaseModel {
+  static $columns = ['createdAt', 'data', 'id', 'motivo', 'userId'] as const
+  $columns = BloqueiosAgendumSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.date()
+  declare data: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare motivo: string
+  @column()
+  declare userId: string
+}
+
 export class ConfiguracoeSchema extends BaseModel {
   static $columns = ['bannerSubtitulo', 'bannerTitulo', 'corPrincipal', 'corSecundaria', 'createdAt', 'endereco', 'especialidade', 'heroSubtitulo', 'heroTitulo', 'heroTituloDestaque', 'id', 'instagram', 'logoUrl', 'nomeExibicao', 'nomeProfissional', 'primeiraVisita', 'tagline', 'updatedAt', 'userId', 'whatsapp'] as const
   $columns = ConfiguracoeSchema.$columns
@@ -86,6 +101,23 @@ export class ConfiguracoeSchema extends BaseModel {
   declare userId: string
   @column()
   declare whatsapp: string | null
+}
+
+export class DisponibilidadeSchema extends BaseModel {
+  static $columns = ['createdAt', 'dias', 'id', 'intervaloAtendimentoMinutos', 'updatedAt', 'userId'] as const
+  $columns = DisponibilidadeSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare dias: any
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare intervaloAtendimentoMinutos: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
 }
 
 export class ServicoSchema extends BaseModel {

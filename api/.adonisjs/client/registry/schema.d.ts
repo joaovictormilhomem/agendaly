@@ -79,4 +79,100 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'profile.public_show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/public/:slug/perfil'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'profile.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/perfil'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'profile.update': {
+    methods: ["PUT"]
+    pattern: '/api/admin/:slug/perfil'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'servicos.public_index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/public/:slug/servicos'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'servicos.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/servicos'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'servicos.store': {
+    methods: ["POST"]
+    pattern: '/api/admin/:slug/servicos'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'servicos.update': {
+    methods: ["PUT"]
+    pattern: '/api/admin/:slug/servicos/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { slug: ParamValue; id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'servicos.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/admin/:slug/servicos/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { slug: ParamValue; id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
 }

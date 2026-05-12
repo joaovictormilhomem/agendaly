@@ -43,6 +43,76 @@ export class AuthSessionSchema extends BaseModel {
   declare userId: string
 }
 
+export class ConfiguracoeSchema extends BaseModel {
+  static $columns = ['bannerSubtitulo', 'bannerTitulo', 'corPrincipal', 'corSecundaria', 'createdAt', 'endereco', 'especialidade', 'heroSubtitulo', 'heroTitulo', 'heroTituloDestaque', 'id', 'instagram', 'logoUrl', 'nomeExibicao', 'nomeProfissional', 'primeiraVisita', 'tagline', 'updatedAt', 'userId', 'whatsapp'] as const
+  $columns = ConfiguracoeSchema.$columns
+  @column()
+  declare bannerSubtitulo: string | null
+  @column()
+  declare bannerTitulo: string | null
+  @column()
+  declare corPrincipal: string
+  @column()
+  declare corSecundaria: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare endereco: string | null
+  @column()
+  declare especialidade: string | null
+  @column()
+  declare heroSubtitulo: string | null
+  @column()
+  declare heroTitulo: string | null
+  @column()
+  declare heroTituloDestaque: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare instagram: string | null
+  @column()
+  declare logoUrl: string | null
+  @column()
+  declare nomeExibicao: string | null
+  @column()
+  declare nomeProfissional: string | null
+  @column()
+  declare primeiraVisita: boolean
+  @column()
+  declare tagline: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
+  @column()
+  declare whatsapp: string | null
+}
+
+export class ServicoSchema extends BaseModel {
+  static $columns = ['ativo', 'createdAt', 'descricao', 'duracaoMinutos', 'emoji', 'id', 'nome', 'preco', 'updatedAt', 'userId'] as const
+  $columns = ServicoSchema.$columns
+  @column()
+  declare ativo: boolean
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare descricao: string | null
+  @column()
+  declare duracaoMinutos: number
+  @column()
+  declare emoji: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare nome: string
+  @column()
+  declare preco: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'id', 'name', 'passwordHash', 'role', 'slug', 'updatedAt'] as const
   $columns = UserSchema.$columns

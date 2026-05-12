@@ -1,5 +1,7 @@
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import Servico from '#models/servico'
 
 export type UserRole = 'SUPERADMIN' | 'PROFISSIONAL'
 
@@ -30,6 +32,9 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime | null
+
+  @hasMany(() => Servico)
+  declare servicos: HasMany<typeof Servico>
 
   get initials() {
     const [first, last] = this.name ? this.name.split(' ') : this.email.split('@')

@@ -5,6 +5,7 @@ import { MasterLayout } from "@/layouts/MasterLayout"
 import { LoginPage } from "@/pages/auth/LoginPage"
 import { MasterDashboardPage } from "@/pages/master/MasterDashboardPage"
 import { DashboardPage } from "@/pages/admin/DashboardPage"
+import { AgendaPage } from "@/pages/admin/AgendaPage"
 import { PersonalizarPage } from "@/pages/admin/PersonalizarPage"
 import { ServicosPage } from "@/pages/admin/ServicosPage"
 import { DisponibilidadePage } from "@/pages/admin/DisponibilidadePage"
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
           { path: "dashboard", element: <DashboardPage /> },
+          { path: "agenda", element: <AgendaPage /> },
           { path: "servicos", element: <ServicosPage /> },
           { path: "disponibilidade", element: <DisponibilidadePage /> },
           { path: "personalizar", element: <PersonalizarPage /> },

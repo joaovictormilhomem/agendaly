@@ -12,4 +12,9 @@ export interface ApiDefinition {
     impersonate: typeof routes['users.impersonate']
     store: typeof routes['users.store']
   }
+  profile: {
+    publicShow: typeof routes['profile.public_show']
+    show: typeof routes['profile.show']
+    update: typeof routes['profile.update']
+  }
 }

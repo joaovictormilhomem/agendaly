@@ -79,4 +79,40 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'profile.public_show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/public/:slug/perfil'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'profile.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/perfil'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'profile.update': {
+    methods: ["PUT"]
+    pattern: '/api/admin/:slug/perfil'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
 }

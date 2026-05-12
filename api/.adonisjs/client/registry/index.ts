@@ -42,6 +42,24 @@ const routes = {
     tokens: [{"old":"/api/users","type":0,"val":"api","end":""},{"old":"/api/users","type":0,"val":"users","end":""}],
     types: placeholder as Registry['users.store']['types'],
   },
+  'profile.public_show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/public/:slug/perfil',
+    tokens: [{"old":"/api/public/:slug/perfil","type":0,"val":"api","end":""},{"old":"/api/public/:slug/perfil","type":0,"val":"public","end":""},{"old":"/api/public/:slug/perfil","type":1,"val":"slug","end":""},{"old":"/api/public/:slug/perfil","type":0,"val":"perfil","end":""}],
+    types: placeholder as Registry['profile.public_show']['types'],
+  },
+  'profile.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/perfil',
+    tokens: [{"old":"/api/admin/:slug/perfil","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/perfil","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/perfil","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/perfil","type":0,"val":"perfil","end":""}],
+    types: placeholder as Registry['profile.show']['types'],
+  },
+  'profile.update': {
+    methods: ["PUT"],
+    pattern: '/api/admin/:slug/perfil',
+    tokens: [{"old":"/api/admin/:slug/perfil","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/perfil","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/perfil","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/perfil","type":0,"val":"perfil","end":""}],
+    types: placeholder as Registry['profile.update']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

@@ -11,6 +11,7 @@ import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 import AuthController from '#controllers/auth_controller'
 import UsersController from '#controllers/users_controller'
+import ProfileController from '#controllers/profile_controller'
 
 router.get('/', () => {
   return { hello: 'world' }
@@ -45,3 +46,13 @@ router
   .post('/api/users', [UsersController, 'store'])
   .use(middleware.jwtAuth())
   .use(middleware.superadmin())
+
+router.get('/api/public/:slug/perfil', [ProfileController, 'publicShow'])
+
+router
+  .get('/api/admin/:slug/perfil', [ProfileController, 'show'])
+  .use(middleware.jwtAuth())
+
+router
+  .put('/api/admin/:slug/perfil', [ProfileController, 'update'])
+  .use(middleware.jwtAuth())

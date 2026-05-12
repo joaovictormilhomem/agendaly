@@ -7,12 +7,21 @@ export interface Agendamento {
   servico_nome: string
   servico_emoji: string
   cliente_nome: string
+  cliente_email: string
   cliente_whatsapp: string
   data_hora_inicio: string
   data_hora_fim: string
   status: AgendamentoStatus
   notas_internas: string | null
   created_at: string
+}
+
+export interface AgendamentoCreate {
+  cliente_nome: string
+  cliente_email: string
+  cliente_whatsapp: string
+  servico_id: string
+  data_hora_inicio: string
 }
 
 export interface DashboardStats {

@@ -1,6 +1,7 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import User from '#models/user'
 import Servico from '#models/servico'
+import Configuracao from '#models/configuracao'
 import hash from '@adonisjs/core/services/hash'
 import crypto from 'node:crypto'
 
@@ -54,5 +55,30 @@ export default class extends BaseSeeder {
         }
       )
     }
+
+    await Configuracao.firstOrCreate(
+      { userId: profDemo.id },
+      {
+        id: crypto.randomUUID(),
+        userId: profDemo.id,
+        logoUrl: null,
+        nomeExibicao: 'Nailê Studio',
+        tagline: 'Nail Designer Profissional',
+        nomeProfissional: 'Nailê Sousa',
+        especialidade: 'Nail Designer',
+        heroTitulo: 'Unhas que contam',
+        heroTituloDestaque: 'a sua história',
+        heroSubtitulo:
+          'Especialista em alongamentos, nail art e esmaltação em gel. Atendimento personalizado em Palmas - TO.',
+        bannerTitulo: 'Pronta para unhas incríveis?',
+        bannerSubtitulo: 'Agende online agora mesmo — disponível 24 horas',
+        endereco: 'Palmas - TO',
+        instagram: '@naile_studio',
+        whatsapp: '(63) 99999-9999',
+        corPrincipal: '#D4788A',
+        corSecundaria: '#F2C4CE',
+        primeiraVisita: false,
+      }
+    )
   }
 }

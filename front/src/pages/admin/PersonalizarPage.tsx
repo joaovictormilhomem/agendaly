@@ -118,12 +118,12 @@ export function PersonalizarPage() {
             <>
               <h1 className="text-3xl font-bold font-playfair text-foreground">Personalizar página</h1>
               <a
-                href={`https://agendaai.app/${slug}`}
+                href={`${window.location.origin}/${slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-0.5"
               >
-                URL pública: agendaai.app/{slug}
+                URL pública: {window.location.host}/{slug}
                 <ExternalLink className="h-3 w-3" />
               </a>
             </>

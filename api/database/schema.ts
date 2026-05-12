@@ -88,6 +88,31 @@ export class ConfiguracoeSchema extends BaseModel {
   declare whatsapp: string | null
 }
 
+export class ServicoSchema extends BaseModel {
+  static $columns = ['ativo', 'createdAt', 'descricao', 'duracaoMinutos', 'emoji', 'id', 'nome', 'preco', 'updatedAt', 'userId'] as const
+  $columns = ServicoSchema.$columns
+  @column()
+  declare ativo: boolean
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare descricao: string | null
+  @column()
+  declare duracaoMinutos: number
+  @column()
+  declare emoji: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare nome: string
+  @column()
+  declare preco: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'id', 'name', 'passwordHash', 'role', 'slug', 'updatedAt'] as const
   $columns = UserSchema.$columns

@@ -11,6 +11,7 @@ import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 import AuthController from '#controllers/auth_controller'
 import UsersController from '#controllers/users_controller'
+import ServicosController from '#controllers/servicos_controller'
 import ProfileController from '#controllers/profile_controller'
 
 router.get('/', () => {
@@ -47,12 +48,34 @@ router
   .use(middleware.jwtAuth())
   .use(middleware.superadmin())
 
+// Perfil — público
 router.get('/api/public/:slug/perfil', [ProfileController, 'publicShow'])
 
+// Perfil — admin
 router
   .get('/api/admin/:slug/perfil', [ProfileController, 'show'])
   .use(middleware.jwtAuth())
 
 router
   .put('/api/admin/:slug/perfil', [ProfileController, 'update'])
+  .use(middleware.jwtAuth())
+
+// Serviços — público
+router.get('/api/public/:slug/servicos', [ServicosController, 'publicIndex'])
+
+// Serviços — admin
+router
+  .get('/api/admin/:slug/servicos', [ServicosController, 'index'])
+  .use(middleware.jwtAuth())
+
+router
+  .post('/api/admin/:slug/servicos', [ServicosController, 'store'])
+  .use(middleware.jwtAuth())
+
+router
+  .put('/api/admin/:slug/servicos/:id', [ServicosController, 'update'])
+  .use(middleware.jwtAuth())
+
+router
+  .delete('/api/admin/:slug/servicos/:id', [ServicosController, 'destroy'])
   .use(middleware.jwtAuth())

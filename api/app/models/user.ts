@@ -1,7 +1,9 @@
-import { BaseModel, column, hasOne } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasOne, hasMany } from '@adonisjs/lucid/orm'
 import type { HasOne } from '@adonisjs/lucid/types/relations'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import Configuracao from '#models/configuracao'
+import Servico from '#models/servico'
 
 export type UserRole = 'SUPERADMIN' | 'PROFISSIONAL'
 
@@ -35,6 +37,9 @@ export default class User extends BaseModel {
 
   @hasOne(() => Configuracao)
   declare configuracao: HasOne<typeof Configuracao>
+
+  @hasMany(() => Servico)
+  declare servicos: HasMany<typeof Servico>
 
   get initials() {
     const [first, last] = this.name ? this.name.split(' ') : this.email.split('@')

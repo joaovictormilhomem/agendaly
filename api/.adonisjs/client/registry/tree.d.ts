@@ -17,4 +17,11 @@ export interface ApiDefinition {
     show: typeof routes['profile.show']
     update: typeof routes['profile.update']
   }
+  servicos: {
+    publicIndex: typeof routes['servicos.public_index']
+    index: typeof routes['servicos.index']
+    store: typeof routes['servicos.store']
+    update: typeof routes['servicos.update']
+    destroy: typeof routes['servicos.destroy']
+  }
 }

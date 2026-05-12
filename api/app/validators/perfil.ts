@@ -1,7 +1,6 @@
 import vine from '@vinejs/vine'
 
-const hexColor = () =>
-  vine.string().regex(/^#[0-9A-Fa-f]{6}$/)
+const hexColor = () => vine.string().regex(/^#[0-9A-Fa-f]{6}$/)
 
 export const updatePerfilValidator = vine.compile(
   vine.object({

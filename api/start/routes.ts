@@ -13,6 +13,7 @@ import AuthController from '#controllers/auth_controller'
 import UsersController from '#controllers/users_controller'
 import ServicosController from '#controllers/servicos_controller'
 import ProfileController from '#controllers/profile_controller'
+import DisponibilidadeController from '#controllers/disponibilidade_controller'
 
 router.get('/', () => {
   return { hello: 'world' }
@@ -78,4 +79,13 @@ router
 
 router
   .delete('/api/admin/:slug/servicos/:id', [ServicosController, 'destroy'])
+  .use(middleware.jwtAuth())
+
+// Disponibilidade — admin
+router
+  .get('/api/admin/:slug/disponibilidade', [DisponibilidadeController, 'show'])
+  .use(middleware.jwtAuth())
+
+router
+  .put('/api/admin/:slug/disponibilidade', [DisponibilidadeController, 'update'])
   .use(middleware.jwtAuth())

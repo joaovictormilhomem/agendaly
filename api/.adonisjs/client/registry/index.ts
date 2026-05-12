@@ -90,6 +90,18 @@ const routes = {
     tokens: [{"old":"/api/admin/:slug/servicos/:id","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/servicos/:id","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/servicos/:id","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/servicos/:id","type":0,"val":"servicos","end":""},{"old":"/api/admin/:slug/servicos/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['servicos.destroy']['types'],
   },
+  'disponibilidade.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/disponibilidade',
+    tokens: [{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/disponibilidade","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"disponibilidade","end":""}],
+    types: placeholder as Registry['disponibilidade.show']['types'],
+  },
+  'disponibilidade.update': {
+    methods: ["PUT"],
+    pattern: '/api/admin/:slug/disponibilidade',
+    tokens: [{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/disponibilidade","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"disponibilidade","end":""}],
+    types: placeholder as Registry['disponibilidade.update']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

@@ -18,6 +18,8 @@ export type ScannedRoutes = {
     'servicos.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.update': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
     'servicos.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
+    'disponibilidade.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'disponibilidade.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   GET: {
     'users.index': { paramsTuple?: []; params?: {} }
@@ -25,6 +27,7 @@ export type ScannedRoutes = {
     'profile.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'disponibilidade.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   HEAD: {
     'users.index': { paramsTuple?: []; params?: {} }
@@ -32,6 +35,7 @@ export type ScannedRoutes = {
     'profile.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'disponibilidade.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   POST: {
     'auth.login': { paramsTuple?: []; params?: {} }
@@ -44,6 +48,7 @@ export type ScannedRoutes = {
   PUT: {
     'profile.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.update': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
+    'disponibilidade.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   DELETE: {
     'servicos.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }

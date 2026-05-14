@@ -36,4 +36,9 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Session
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
+
+  /** URL do serviço whatsapp-worker (ex.: http://127.0.0.1:3334). Se vazio, notificações WA ficam desligadas. */
+  WHATSAPP_BRIDGE_URL: Env.schema.string.optional({ format: 'url', tld: false }),
+  /** Mesmo valor que WHATSAPP_BRIDGE_SECRET no worker (Bearer). */
+  WHATSAPP_BRIDGE_SECRET: Env.schema.string.optional(),
 })

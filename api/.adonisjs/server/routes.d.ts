@@ -28,6 +28,9 @@ export type ScannedRoutes = {
     'admin_slots.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'disponibilidade.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'disponibilidade.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.status': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.conectar': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.desconectar': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   GET: {
     'users.index': { paramsTuple?: []; params?: {} }
@@ -41,6 +44,7 @@ export type ScannedRoutes = {
     'admin_agenda.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_slots.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'disponibilidade.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.status': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   HEAD: {
     'users.index': { paramsTuple?: []; params?: {} }
@@ -54,6 +58,7 @@ export type ScannedRoutes = {
     'admin_agenda.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_slots.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'disponibilidade.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.status': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   POST: {
     'auth.login': { paramsTuple?: []; params?: {} }
@@ -64,6 +69,8 @@ export type ScannedRoutes = {
     'public_bookings.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_agenda.manual': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.conectar': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.desconectar': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   PUT: {
     'profile.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }

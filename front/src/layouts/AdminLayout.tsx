@@ -9,6 +9,7 @@ const pageTitles: Record<string, string> = {
   agenda: "Agenda",
   servicos: "Serviços",
   disponibilidade: "Disponibilidade",
+  whatsapp: "WhatsApp",
   personalizar: "Personalizar",
 }
 

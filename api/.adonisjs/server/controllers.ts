@@ -7,6 +7,7 @@ export const controllers = {
   AdminAgenda: () => import('#controllers/admin_agenda_controller'),
   AdminDashboard: () => import('#controllers/admin_dashboard_controller'),
   AdminSlots: () => import('#controllers/admin_slots_controller'),
+  AdminWhatsapp: () => import('#controllers/admin_whatsapp_controller'),
   Auth: () => import('#controllers/auth_controller'),
   Disponibilidade: () => import('#controllers/disponibilidade_controller'),
   Profile: () => import('#controllers/profile_controller'),

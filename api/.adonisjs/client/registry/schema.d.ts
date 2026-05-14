@@ -295,4 +295,40 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'admin_whatsapp.status': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/whatsapp/status'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_whatsapp.conectar': {
+    methods: ["POST"]
+    pattern: '/api/admin/:slug/whatsapp/conectar'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_whatsapp.desconectar': {
+    methods: ["POST"]
+    pattern: '/api/admin/:slug/whatsapp/desconectar'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
 }

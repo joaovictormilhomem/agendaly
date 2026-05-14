@@ -1,0 +1,59 @@
+diff --git a/node_modules/whatsapp-web.js/src/util/Injected/Utils.js b/node_modules/whatsapp-web.js/src/util/Injected/Utils.js
+index 540078a..ca42fe9 100644
+--- a/node_modules/whatsapp-web.js/src/util/Injected/Utils.js
++++ b/node_modules/whatsapp-web.js/src/util/Injected/Utils.js
+@@ -861,13 +861,51 @@ exports.LoadUtils = () => {
+                 chat = null;
+             }
+         } else {
+-            chat =
+-                window.require('WAWebCollections').Chat.get(chatWid) ||
+-                (
++            chat = window.require('WAWebCollections').Chat.get(chatWid);
++            if (!chat) {
++                chat = (
+                     await window
+                         .require('WAWebFindChatAction')
+                         .findOrCreateLatestChat(chatWid)
++                        .catch(() => null)
+                 )?.chat;
++            }
++            if (!chat) {
++                try {
++                    const syncUtils = window.require('WAWebContactSyncUtils');
++                    if (
++                        syncUtils &&
++                        typeof syncUtils.constructUsyncDeltaQuery === 'function'
++                    ) {
++                        const query = syncUtils.constructUsyncDeltaQuery([
++                            { type: 'add', phoneNumber: chatWid.user },
++                        ]);
++                        const result = await query.execute();
++                        const row = result?.list?.[0] ?? result?.users?.[0];
++                        const lidRaw =
++                            row?.lid ??
++                            row?.userLid ??
++                            (typeof row === 'string' ? row : null) ??
++                            (row?.wid?.server === 'lid' ? row.wid._serialized : null);
++                        if (lidRaw) {
++                            const lidWid =
++                                typeof lidRaw === 'string'
++                                    ? window
++                                          .require('WAWebWidFactory')
++                                          .createWid(lidRaw)
++                                    : lidRaw;
++                            chat = (
++                                await window
++                                    .require('WAWebFindChatAction')
++                                    .findOrCreateLatestChat(lidWid)
++                                    .catch(() => null)
++                            )?.chat;
++                        }
++                    }
++                } catch (e) {
++                    /* LID sync unavailable or failed */
++                }
++            }
+         }
+ 
+         return getAsModel && chat

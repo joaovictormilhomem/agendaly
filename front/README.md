@@ -7,6 +7,7 @@ Interface web do Agendaly, construída com Vite + React 19 + TypeScript.
 - Node.js 20+
 - npm 10+
 - API do Agendaly rodando em `http://localhost:3333` (veja `../api/README.md`)
+- Para **WhatsApp real** no painel da profissional: API com `WHATSAPP_BRIDGE_URL` / `WHATSAPP_BRIDGE_SECRET` e o processo **`whatsapp-worker`** ativos (veja `../whatsapp-worker/README.md`). Com mocks (`VITE_USE_MOCKS=true`), a página WhatsApp usa respostas simuladas.
 
 ## Instalação
 

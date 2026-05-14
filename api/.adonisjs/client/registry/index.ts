@@ -150,6 +150,24 @@ const routes = {
     tokens: [{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/disponibilidade","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/disponibilidade","type":0,"val":"disponibilidade","end":""}],
     types: placeholder as Registry['disponibilidade.update']['types'],
   },
+  'admin_whatsapp.status': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/whatsapp/status',
+    tokens: [{"old":"/api/admin/:slug/whatsapp/status","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/whatsapp/status","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/whatsapp/status","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/whatsapp/status","type":0,"val":"whatsapp","end":""},{"old":"/api/admin/:slug/whatsapp/status","type":0,"val":"status","end":""}],
+    types: placeholder as Registry['admin_whatsapp.status']['types'],
+  },
+  'admin_whatsapp.conectar': {
+    methods: ["POST"],
+    pattern: '/api/admin/:slug/whatsapp/conectar',
+    tokens: [{"old":"/api/admin/:slug/whatsapp/conectar","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/whatsapp/conectar","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/whatsapp/conectar","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/whatsapp/conectar","type":0,"val":"whatsapp","end":""},{"old":"/api/admin/:slug/whatsapp/conectar","type":0,"val":"conectar","end":""}],
+    types: placeholder as Registry['admin_whatsapp.conectar']['types'],
+  },
+  'admin_whatsapp.desconectar': {
+    methods: ["POST"],
+    pattern: '/api/admin/:slug/whatsapp/desconectar',
+    tokens: [{"old":"/api/admin/:slug/whatsapp/desconectar","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/whatsapp/desconectar","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/whatsapp/desconectar","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/whatsapp/desconectar","type":0,"val":"whatsapp","end":""},{"old":"/api/admin/:slug/whatsapp/desconectar","type":0,"val":"desconectar","end":""}],
+    types: placeholder as Registry['admin_whatsapp.desconectar']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

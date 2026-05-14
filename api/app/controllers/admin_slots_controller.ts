@@ -7,7 +7,8 @@ const slotEngine = new SlotEngineService()
 
 export default class AdminSlotsController {
   /**
-   * Slots para agendamento manual (BE-9): ignora expediente/bloqueio; só conflita com CONFIRMADOS no motor.
+   * Slots para agendamento manual (BE-9): mesmos turnos da disponibilidade; ignora bloqueio de agenda;
+   * na grade só remove choque com CONFIRMADOS (PENDENTE não bloqueia).
    */
   async index({ params, request, authJwt, response }: HttpContext) {
     const user = await findUserAndAuthorize(params.slug, authJwt, response)

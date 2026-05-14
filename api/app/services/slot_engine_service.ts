@@ -59,7 +59,9 @@ export type SlotMode = 'public' | 'manual'
 
 export default class SlotEngineService {
   /**
-   * BE-6: slots livres. `mode=manual` ignora disponibilidade e bloqueios; só remove choque com CONFIRMADOS.
+   * BE-6: slots livres a partir da disponibilidade (grid + intervalos do dia).
+   * `mode=manual` usa os mesmos turnos configurados; ignora bloqueio de agenda e, na checagem de choque,
+   * considera só CONFIRMADOS (PENDENTE não bloqueia o agendamento manual na grade).
    */
   async computeSlots(params: {
     user: User
@@ -116,47 +118,34 @@ export default class SlotEngineService {
         ? await BloqueioAgenda.query().where('user_id', user.id).where('data', data).first()
         : null
 
+    if (mode === 'public' && bloqueioNoDia) {
+      const empty: { hora: string; disponivel: boolean }[] = []
+      slotCache.set(key, { expires: Date.now() + SLOT_CACHE_TTL_MS, payload: empty })
+      return empty
+    }
+
+    const diaCfg = disp.dias.find((d) => d.dia === jsWeekdayFromLuxon(dayStart))
+    if (!diaCfg?.ativo) {
+      const empty: { hora: string; disponivel: boolean }[] = []
+      slotCache.set(key, { expires: Date.now() + SLOT_CACHE_TTL_MS, payload: empty })
+      return empty
+    }
+
     const candidatos: DateTime[] = []
-
-    if (mode === 'manual') {
-      let m = 0
-      const ultimo = 24 * 60 - 1
-      while (m <= ultimo) {
+    for (const intervalo of diaCfg.intervalos) {
+      const { h: h0, m: m0 } = parseHhMm(intervalo.hora_inicio)
+      const { h: h1, m: m1 } = parseHhMm(intervalo.hora_fim)
+      const startMin = h0 * 60 + m0
+      const endMin = h1 * 60 + m1
+      let m = startMin
+      while (m < endMin) {
         const start = atMinutesOnDay(dayStart, m)
-        const fimServico = start.plus({ minutes: duracao })
-        if (fimServico > dayEnd) break
-        candidatos.push(start)
-        m += intervaloGrid
-      }
-    } else {
-      if (bloqueioNoDia) {
-        const empty: { hora: string; disponivel: boolean }[] = []
-        slotCache.set(key, { expires: Date.now() + SLOT_CACHE_TTL_MS, payload: empty })
-        return empty
-      }
-
-      const diaCfg = disp.dias.find((d) => d.dia === jsWeekdayFromLuxon(dayStart))
-      if (!diaCfg?.ativo) {
-        const empty: { hora: string; disponivel: boolean }[] = []
-        slotCache.set(key, { expires: Date.now() + SLOT_CACHE_TTL_MS, payload: empty })
-        return empty
-      }
-
-      for (const intervalo of diaCfg.intervalos) {
-        const { h: h0, m: m0 } = parseHhMm(intervalo.hora_inicio)
-        const { h: h1, m: m1 } = parseHhMm(intervalo.hora_fim)
-        const startMin = h0 * 60 + m0
-        const endMin = h1 * 60 + m1
-        let m = startMin
-        while (m < endMin) {
-          const start = atMinutesOnDay(dayStart, m)
-          const fimComBuffer = start.plus({ minutes: duracao + intervaloApos })
-          const intervalEnd = atMinutesOnDay(dayStart, endMin)
-          if (fimComBuffer <= intervalEnd) {
-            candidatos.push(start)
-          }
-          m += intervaloGrid
+        const fimComBuffer = start.plus({ minutes: duracao + intervaloApos })
+        const intervalEnd = atMinutesOnDay(dayStart, endMin)
+        if (fimComBuffer <= intervalEnd) {
+          candidatos.push(start)
         }
+        m += intervaloGrid
       }
     }
 

@@ -66,6 +66,18 @@ const routes = {
     tokens: [{"old":"/api/public/:slug/servicos","type":0,"val":"api","end":""},{"old":"/api/public/:slug/servicos","type":0,"val":"public","end":""},{"old":"/api/public/:slug/servicos","type":1,"val":"slug","end":""},{"old":"/api/public/:slug/servicos","type":0,"val":"servicos","end":""}],
     types: placeholder as Registry['servicos.public_index']['types'],
   },
+  'public_slots.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/public/:slug/slots',
+    tokens: [{"old":"/api/public/:slug/slots","type":0,"val":"api","end":""},{"old":"/api/public/:slug/slots","type":0,"val":"public","end":""},{"old":"/api/public/:slug/slots","type":1,"val":"slug","end":""},{"old":"/api/public/:slug/slots","type":0,"val":"slots","end":""}],
+    types: placeholder as Registry['public_slots.index']['types'],
+  },
+  'public_bookings.store': {
+    methods: ["POST"],
+    pattern: '/api/public/:slug/agendar',
+    tokens: [{"old":"/api/public/:slug/agendar","type":0,"val":"api","end":""},{"old":"/api/public/:slug/agendar","type":0,"val":"public","end":""},{"old":"/api/public/:slug/agendar","type":1,"val":"slug","end":""},{"old":"/api/public/:slug/agendar","type":0,"val":"agendar","end":""}],
+    types: placeholder as Registry['public_bookings.store']['types'],
+  },
   'servicos.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/admin/:slug/servicos',
@@ -89,6 +101,42 @@ const routes = {
     pattern: '/api/admin/:slug/servicos/:id',
     tokens: [{"old":"/api/admin/:slug/servicos/:id","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/servicos/:id","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/servicos/:id","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/servicos/:id","type":0,"val":"servicos","end":""},{"old":"/api/admin/:slug/servicos/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['servicos.destroy']['types'],
+  },
+  'admin_dashboard.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/dashboard',
+    tokens: [{"old":"/api/admin/:slug/dashboard","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/dashboard","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/dashboard","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/dashboard","type":0,"val":"dashboard","end":""}],
+    types: placeholder as Registry['admin_dashboard.show']['types'],
+  },
+  'admin_agenda.manual': {
+    methods: ["POST"],
+    pattern: '/api/admin/:slug/agenda/manual',
+    tokens: [{"old":"/api/admin/:slug/agenda/manual","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/agenda/manual","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/agenda/manual","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/agenda/manual","type":0,"val":"agenda","end":""},{"old":"/api/admin/:slug/agenda/manual","type":0,"val":"manual","end":""}],
+    types: placeholder as Registry['admin_agenda.manual']['types'],
+  },
+  'admin_agenda.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/agenda/:id',
+    tokens: [{"old":"/api/admin/:slug/agenda/:id","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/agenda/:id","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/agenda/:id","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/agenda/:id","type":0,"val":"agenda","end":""},{"old":"/api/admin/:slug/agenda/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['admin_agenda.show']['types'],
+  },
+  'admin_agenda.update_status': {
+    methods: ["PATCH"],
+    pattern: '/api/admin/:slug/agenda/:id/status',
+    tokens: [{"old":"/api/admin/:slug/agenda/:id/status","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/agenda/:id/status","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/agenda/:id/status","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/agenda/:id/status","type":0,"val":"agenda","end":""},{"old":"/api/admin/:slug/agenda/:id/status","type":1,"val":"id","end":""},{"old":"/api/admin/:slug/agenda/:id/status","type":0,"val":"status","end":""}],
+    types: placeholder as Registry['admin_agenda.update_status']['types'],
+  },
+  'admin_agenda.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/agenda',
+    tokens: [{"old":"/api/admin/:slug/agenda","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/agenda","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/agenda","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/agenda","type":0,"val":"agenda","end":""}],
+    types: placeholder as Registry['admin_agenda.index']['types'],
+  },
+  'admin_slots.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/slots',
+    tokens: [{"old":"/api/admin/:slug/slots","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/slots","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/slots","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/slots","type":0,"val":"slots","end":""}],
+    types: placeholder as Registry['admin_slots.index']['types'],
   },
   'disponibilidade.show': {
     methods: ["GET","HEAD"],

@@ -18,15 +18,18 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
+import { Textarea } from "@/components/ui/textarea"
 import { getServicos } from "@/api/admin/servicos"
-import { createAgendamento, getAdminSlots } from "@/api/admin/agenda"
+import { createAgendamentoManual, getAdminSlots } from "@/api/admin/agenda"
+import { combineDateAndTimeToIso } from "@/lib/datetime"
 import { cn } from "@/lib/utils"
 
 const schema = z.object({
   cliente_nome: z.string().min(1, "Nome é obrigatório"),
-  cliente_email: z.string().email("E-mail inválido"),
+  cliente_email: z.union([z.literal(""), z.string().email("E-mail inválido")]),
   cliente_whatsapp: z.string().min(1, "Telefone é obrigatório"),
-  servico_id: z.string().min(1, "Selecione um serviço"),
+  servicoId: z.string().min(1, "Selecione um serviço"),
+  notas_internas: z.string().min(1, "Notas internas são obrigatórias"),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -52,10 +55,16 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { cliente_nome: "", cliente_email: "", cliente_whatsapp: "", servico_id: "" },
+    defaultValues: {
+      cliente_nome: "",
+      cliente_email: "",
+      cliente_whatsapp: "",
+      servicoId: "",
+      notas_internas: "",
+    },
   })
 
-  const servicoId = form.watch("servico_id")
+  const servicoId = form.watch("servicoId")
 
   const { data: servicos = [] } = useQuery({
     queryKey: ["servicos", slug],
@@ -72,12 +81,13 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
   const { mutate, isPending } = useMutation({
     mutationFn: (values: FormValues) => {
       if (!selectedSlot) throw new Error("Selecione um horário")
-      const [h, m] = selectedSlot.split(":").map(Number)
-      const dt = new Date(selectedDate)
-      dt.setHours(h, m, 0, 0)
-      return createAgendamento(slug, {
-        ...values,
-        data_hora_inicio: dt.toISOString(),
+      return createAgendamentoManual(slug, {
+        cliente_nome: values.cliente_nome,
+        cliente_email: values.cliente_email.trim() || undefined,
+        cliente_whatsapp: values.cliente_whatsapp.replace(/\D/g, "").slice(0, 20),
+        servicoId: values.servicoId,
+        data_hora_inicio: combineDateAndTimeToIso(selectedDate, selectedSlot),
+        notas_internas: values.notas_internas.trim(),
       })
     },
     onSuccess: () => {
@@ -89,7 +99,13 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
 
   useEffect(() => {
     if (open) {
-      form.reset({ cliente_nome: "", cliente_email: "", cliente_whatsapp: "", servico_id: "" })
+      form.reset({
+        cliente_nome: "",
+        cliente_email: "",
+        cliente_whatsapp: "",
+        servicoId: "",
+        notas_internas: "",
+      })
       setSelectedDate(initialDate ?? new Date())
       setSelectedSlot(null)
     }
@@ -148,7 +164,7 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
             <div className="grid grid-cols-2 gap-3">
               <FormField
                 control={form.control}
-                name="servico_id"
+                name="servicoId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="data-[error=true]:text-foreground">Serviço</FormLabel>
@@ -238,6 +254,24 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
                 <p className="text-sm text-destructive mt-1">{form.formState.errors.root.message}</p>
               )}
             </div>
+
+            <FormField
+              control={form.control}
+              name="notas_internas"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="data-[error=true]:text-foreground">Notas internas</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Motivo do agendamento manual, observações para a equipe…"
+                      className="bg-white min-h-[80px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="rounded-full">

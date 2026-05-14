@@ -16,7 +16,7 @@ const MOCK_USERS = [
 ]
 
 export const authHandlers = [
-  http.post("/api/login", async ({ request }) => {
+  http.post("*/api/login", async ({ request }) => {
     const body = await request.json() as { email: string; password: string }
     const match = MOCK_USERS.find((u) => u.email === body.email && u.password === body.password)
     if (!match) {
@@ -25,7 +25,7 @@ export const authHandlers = [
     return HttpResponse.json({ token: match.token, refresh_token: `mock-refresh-${match.token}` })
   }),
 
-  http.get("/api/me", ({ request }) => {
+  http.get("*/api/me", ({ request }) => {
     const authHeader = request.headers.get("authorization") || request.headers.get("Authorization")
     const token = authHeader?.replace("Bearer ", "")
     const match = MOCK_USERS.find((u) => u.token === token)
@@ -36,11 +36,11 @@ export const authHandlers = [
     return HttpResponse.json(match.me)
   }),
 
-  http.post("/api/logout", () => {
+  http.post("*/api/logout", () => {
     return HttpResponse.json({ message: "Logout efetuado" })
   }),
 
-  http.post("/api/refresh", ({ request: _req }) => {
+  http.post("*/api/refresh", ({ request: _req }) => {
     return HttpResponse.json({ token: "mock-token-refreshed", refresh_token: "mock-refresh-refreshed" })
   }),
 ]

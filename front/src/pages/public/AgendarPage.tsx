@@ -1,11 +1,14 @@
 import { useState } from "react"
 import { useParams } from "react-router-dom"
+import { toast } from "sonner"
 import { ServiceSelectionStep } from "@/components/agendamento/steps/ServiceSelectionStep"
 import { DateTimeStep } from "@/components/agendamento/steps/DateTimeStep"
 import { ContactInfoStep } from "@/components/agendamento/steps/ContactInfoStep"
 import { ConfirmationStep } from "@/components/agendamento/steps/ConfirmationStep"
 import { SuccessFeedback } from "@/components/agendamento/SuccessFeedback"
 import { Stepper } from "@/components/agendamento/Stepper"
+import { agendarPublico, parseAgendarConflict } from "@/api/public/agendar"
+import { combineDateAndTimeToIso } from "@/lib/datetime"
 import type { Servico } from "@/types/servico"
 
 export interface BookingData {
@@ -72,32 +75,30 @@ export function AgendarPage() {
         throw new Error("Dados de agendamento incompletos")
       }
 
-      const [hours, minutes] = bookingData.time.split(":").map(Number)
-      const startDateTime = new Date(bookingData.date)
-      startDateTime.setHours(hours, minutes, 0, 0)
+      const slot_datetime = combineDateAndTimeToIso(bookingData.date, bookingData.time)
 
-      const endDateTime = new Date(startDateTime)
-      endDateTime.setMinutes(endDateTime.getMinutes() + bookingData.service.duracao_minutos)
-
-      const agendamentoData = {
-        servico_id: bookingData.service.id,
+      await agendarPublico(slug, {
         cliente_nome: bookingData.clientName,
-        cliente_whatsapp: bookingData.clientWhatsapp,
-        cliente_email: bookingData.clientEmail,
-        data_hora_inicio: startDateTime.toISOString(),
-        data_hora_fim: endDateTime.toISOString(),
-      }
-
-      // TODO: Replace with actual API call
-      console.log("Submitting booking:", agendamentoData)
-
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+        cliente_whatsapp: bookingData.clientWhatsapp.replace(/\D/g, "").slice(0, 20),
+        cliente_email: bookingData.clientEmail.trim() || undefined,
+        servicoId: bookingData.service.id,
+        slot_datetime,
+      })
 
       setShowSuccess(true)
     } catch (error) {
-      console.error("Erro ao confirmar agendamento:", error)
-      // TODO: Show error toast
+      const conflict = parseAgendarConflict(error)
+      if (conflict) {
+        toast.error(conflict.mensagem, {
+          description:
+            conflict.slots_sugeridos.length > 0
+              ? `Sugestões: ${conflict.slots_sugeridos.join(", ")}`
+              : undefined,
+        })
+      } else {
+        console.error("Erro ao confirmar agendamento:", error)
+        toast.error("Não foi possível concluir o agendamento. Tente novamente.")
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -110,7 +111,7 @@ export function AgendarPage() {
 
         <div className="mt-12">
           {currentStep === 1 && <ServiceSelectionStep slug={slug} onServiceSelect={handleServiceSelect} />}
-          {currentStep === 2 && (
+          {currentStep === 2 && bookingData.service && (
             <DateTimeStep
               slug={slug}
               service={bookingData.service}

@@ -24,6 +24,24 @@ export interface ApiDefinition {
     update: typeof routes['servicos.update']
     destroy: typeof routes['servicos.destroy']
   }
+  publicSlots: {
+    index: typeof routes['public_slots.index']
+  }
+  publicBookings: {
+    store: typeof routes['public_bookings.store']
+  }
+  adminDashboard: {
+    show: typeof routes['admin_dashboard.show']
+  }
+  adminAgenda: {
+    manual: typeof routes['admin_agenda.manual']
+    show: typeof routes['admin_agenda.show']
+    updateStatus: typeof routes['admin_agenda.update_status']
+    index: typeof routes['admin_agenda.index']
+  }
+  adminSlots: {
+    index: typeof routes['admin_slots.index']
+  }
   disponibilidade: {
     show: typeof routes['disponibilidade.show']
     update: typeof routes['disponibilidade.update']

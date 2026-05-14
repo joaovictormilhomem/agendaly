@@ -4,9 +4,14 @@
  */
 
 export const controllers = {
+  AdminAgenda: () => import('#controllers/admin_agenda_controller'),
+  AdminDashboard: () => import('#controllers/admin_dashboard_controller'),
+  AdminSlots: () => import('#controllers/admin_slots_controller'),
   Auth: () => import('#controllers/auth_controller'),
   Disponibilidade: () => import('#controllers/disponibilidade_controller'),
   Profile: () => import('#controllers/profile_controller'),
+  PublicBookings: () => import('#controllers/public_bookings_controller'),
+  PublicSlots: () => import('#controllers/public_slots_controller'),
   Servicos: () => import('#controllers/servicos_controller'),
   Users: () => import('#controllers/users_controller'),
 }

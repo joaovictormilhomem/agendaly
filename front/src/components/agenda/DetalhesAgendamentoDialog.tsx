@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { StatusChip } from "@/components/shared/StatusChip"
-import { confirmarAgendamento } from "@/api/admin/agenda"
-import type { Agendamento } from "@/types/agenda"
+import { patchAgendamentoStatus } from "@/api/admin/agenda"
+import type { AgendaListResponse, Agendamento } from "@/types/agenda"
 
 interface Props {
   agendamento: Agendamento | null
@@ -39,9 +39,28 @@ export function DetalhesAgendamentoDialog({ agendamento, open, onOpenChange, slu
   const qc = useQueryClient()
 
   const { mutate: confirmar, isPending: confirming } = useMutation({
-    mutationFn: () => confirmarAgendamento(slug, agendamento!.id),
+    mutationFn: () => patchAgendamentoStatus(slug, agendamento!.id, { status: "CONFIRMADO" }),
+    onMutate: async () => {
+      const id = agendamento!.id
+      await qc.cancelQueries({ queryKey: ["agenda", slug] })
+      const previousEntries = qc.getQueriesData<AgendaListResponse>({ queryKey: ["agenda", slug] })
+      previousEntries.forEach(([key, previous]) => {
+        if (!previous) return
+        qc.setQueryData(key, {
+          ...previous,
+          agendamentos: previous.agendamentos.map((a) =>
+            a.id === id
+              ? { ...a, status: "CONFIRMADO" as const, status_confirmacao: "confirmado_cliente" }
+              : a
+          ),
+        })
+      })
+      return { previousEntries }
+    },
+    onError: (_e, _v, ctx) => {
+      ctx?.previousEntries?.forEach(([key, data]) => qc.setQueryData(key, data))
+    },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["agenda", slug] })
       qc.invalidateQueries({ queryKey: ["dashboard", slug] })
       onOpenChange(false)
     },
@@ -66,8 +85,8 @@ export function DetalhesAgendamentoDialog({ agendamento, open, onOpenChange, slu
 
         <div className="space-y-4">
           <div className="flex items-center gap-2 rounded-lg bg-secondary/50 px-3 py-2">
-            <span className="text-xl">{agendamento.servico_emoji}</span>
-            <p className="text-sm font-semibold text-foreground">{agendamento.servico_nome}</p>
+            <span className="text-xl">{agendamento.servico.emoji}</span>
+            <p className="text-sm font-semibold text-foreground">{agendamento.servico.nome}</p>
           </div>
 
           <div className="space-y-3">

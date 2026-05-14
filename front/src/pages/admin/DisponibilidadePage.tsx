@@ -52,6 +52,30 @@ const disponibilidadeSchema = z.object({
 
 export type DisponibilidadeFormValues = z.infer<typeof disponibilidadeSchema>
 
+/** Linhas do formulário seg–dom; `dia` segue getDay(): 1=seg … 6=sáb, 0=dom. */
+const DIA_POR_LINHA_FORM: (0 | 1 | 2 | 3 | 4 | 5 | 6)[] = [1, 2, 3, 4, 5, 6, 0]
+
+function diasDefaultForm(): DisponibilidadeFormValues["dias"] {
+  return DIA_POR_LINHA_FORM.map((dia) => ({
+    dia,
+    ativo: dia >= 1 && dia <= 5,
+    intervalos: [{ hora_inicio: "09:00", hora_fim: "18:00" }],
+  }))
+}
+
+function diasFromApi(apiDias: DisponibilidadeFormValues["dias"]): DisponibilidadeFormValues["dias"] {
+  return DIA_POR_LINHA_FORM.map((dia) => {
+    const found = apiDias.find((d) => d.dia === dia)
+    return (
+      found ?? {
+        dia,
+        ativo: false,
+        intervalos: [],
+      }
+    )
+  })
+}
+
 const INTERVALOS_OPTS = [
   { value: 0,  label: "Sem intervalo" },
   { value: 10, label: "10 min" },
@@ -80,11 +104,7 @@ export function DisponibilidadePage() {
     resolver: zodResolver(disponibilidadeSchema),
     defaultValues: {
       intervalo_atendimento_minutos: 30,
-      dias: Array.from({ length: 7 }, (_, i) => ({
-        dia: i as 0 | 1 | 2 | 3 | 4 | 5 | 6,
-        ativo: i < 5,
-        intervalos: [{ hora_inicio: "09:00", hora_fim: "18:00" }],
-      })),
+      dias: diasDefaultForm(),
       bloqueios: [],
     },
   })
@@ -98,7 +118,7 @@ export function DisponibilidadePage() {
     if (data) {
       form.reset({
         intervalo_atendimento_minutos: data.intervalo_atendimento_minutos,
-        dias: [...data.dias].sort((a, b) => a.dia - b.dia),
+        dias: diasFromApi(data.dias as DisponibilidadeFormValues["dias"]),
         bloqueios: data.bloqueios,
       })
     }

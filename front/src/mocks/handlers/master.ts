@@ -5,12 +5,12 @@ import { profissionaisMock } from "@/mocks/fixtures/profissionais"
 const db = [...profissionaisMock]
 
 export const masterHandlers = [
-  http.get("/api/users", () => {
+  http.get("*/api/users", () => {
     // Return backend shape (name, not nome) — mapBackendUser handles conversion
     return HttpResponse.json(db.map((p) => ({ ...p, name: p.nome })))
   }),
 
-  http.post("/api/users", async ({ request }) => {
+  http.post("*/api/users", async ({ request }) => {
     const body = await request.json() as { name: string; email: string; slug: string; password: string; role: string }
     if (db.find((p) => p.email === body.email)) {
       return HttpResponse.json({ message: "Email já cadastrado" }, { status: 409 })
@@ -30,7 +30,7 @@ export const masterHandlers = [
     return HttpResponse.json({ ...novo, name: novo.nome }, { status: 201 })
   }),
 
-  http.post("/api/users/impersonate/:slug", ({ params }) => {
+  http.post("*/api/users/impersonate/:slug", ({ params }) => {
     const profissional = db.find((p) => p.slug === params.slug)
     if (!profissional) {
       return HttpResponse.json({ message: "Profissional não encontrada" }, { status: 404 })

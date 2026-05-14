@@ -1,21 +1,11 @@
+import { DEFAULT_DIAS } from '#constants/disponibilidade_defaults'
 import BloqueioAgenda from '#models/bloqueio_agenda'
 import Disponibilidade from '#models/disponibilidade'
 import User from '#models/user'
+import { invalidateSlotCacheForUser } from '#services/slot_engine_service'
 import { updateDisponibilidadeValidator } from '#validators/disponibilidade'
 import type { HttpContext } from '@adonisjs/core/http'
 import crypto from 'node:crypto'
-
-const DEFAULT_DIAS = [0, 1, 2, 3, 4, 5, 6].map((dia) => ({
-  dia,
-  ativo: dia < 5,
-  intervalos:
-    dia < 5
-      ? [
-          { hora_inicio: '09:00', hora_fim: '12:00' },
-          { hora_inicio: '13:00', hora_fim: '18:00' },
-        ]
-      : [],
-}))
 
 async function findUserAndAuthorize(
   slug: string,
@@ -93,6 +83,8 @@ export default class DisponibilidadeController {
     )
 
     bloqueios.sort((a, b) => a.data.localeCompare(b.data))
+
+    invalidateSlotCacheForUser(user.id)
 
     return response.ok(serialize(disp, bloqueios))
   }

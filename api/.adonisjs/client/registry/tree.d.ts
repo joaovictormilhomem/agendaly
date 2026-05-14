@@ -46,4 +46,9 @@ export interface ApiDefinition {
     show: typeof routes['disponibilidade.show']
     update: typeof routes['disponibilidade.update']
   }
+  adminWhatsapp: {
+    status: typeof routes['admin_whatsapp.status']
+    conectar: typeof routes['admin_whatsapp.conectar']
+    desconectar: typeof routes['admin_whatsapp.desconectar']
+  }
 }

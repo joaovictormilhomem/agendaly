@@ -9,6 +9,7 @@ import { AgendaPage } from "@/pages/admin/AgendaPage"
 import { PersonalizarPage } from "@/pages/admin/PersonalizarPage"
 import { ServicosPage } from "@/pages/admin/ServicosPage"
 import { DisponibilidadePage } from "@/pages/admin/DisponibilidadePage"
+import { WhatsappPage } from "@/pages/admin/WhatsappPage"
 import { LandingPage } from "@/pages/public/LandingPage"
 import { AgendarPage } from "@/pages/public/AgendarPage"
 
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
           { path: "agenda", element: <AgendaPage /> },
           { path: "servicos", element: <ServicosPage /> },
           { path: "disponibilidade", element: <DisponibilidadePage /> },
+          { path: "whatsapp", element: <WhatsappPage /> },
           { path: "personalizar", element: <PersonalizarPage /> },
         ],
       },

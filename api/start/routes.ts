@@ -19,6 +19,7 @@ import PublicBookingsController from '#controllers/public_bookings_controller'
 import AdminAgendaController from '#controllers/admin_agenda_controller'
 import AdminDashboardController from '#controllers/admin_dashboard_controller'
 import AdminSlotsController from '#controllers/admin_slots_controller'
+import AdminWhatsappController from '#controllers/admin_whatsapp_controller'
 
 router.get('/', () => {
   return { hello: 'world' }
@@ -123,4 +124,17 @@ router
 
 router
   .put('/api/admin/:slug/disponibilidade', [DisponibilidadeController, 'update'])
+  .use(middleware.jwtAuth())
+
+// WhatsApp (whatsapp-web.js via worker)
+router
+  .get('/api/admin/:slug/whatsapp/status', [AdminWhatsappController, 'status'])
+  .use(middleware.jwtAuth())
+
+router
+  .post('/api/admin/:slug/whatsapp/conectar', [AdminWhatsappController, 'conectar'])
+  .use(middleware.jwtAuth())
+
+router
+  .post('/api/admin/:slug/whatsapp/desconectar', [AdminWhatsappController, 'desconectar'])
   .use(middleware.jwtAuth())

@@ -222,4 +222,26 @@ export const adminHandlers = [
     disponibilidade.bloqueios = body.bloqueios
     return HttpResponse.json({ ...disponibilidade })
   }),
+
+  http.get("*/api/admin/:slug/whatsapp/status", () => {
+    return HttpResponse.json({
+      habilitado_no_servidor: true,
+      state: "disconnected",
+      qr_data_url: null,
+      error: null,
+    })
+  }),
+
+  http.post("*/api/admin/:slug/whatsapp/conectar", () => {
+    return HttpResponse.json({
+      state: "qr",
+      qr_data_url:
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+      error: null,
+    })
+  }),
+
+  http.post("*/api/admin/:slug/whatsapp/desconectar", () => {
+    return HttpResponse.json({ ok: true })
+  }),
 ]

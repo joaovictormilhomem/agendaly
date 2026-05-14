@@ -1,5 +1,14 @@
 import { Link, useLocation, useParams } from "react-router-dom"
-import { LayoutDashboard, Calendar, Scissors, Clock, Settings, LogOut, CalendarHeart } from "lucide-react"
+import {
+  LayoutDashboard,
+  Calendar,
+  Scissors,
+  Clock,
+  Settings,
+  LogOut,
+  CalendarHeart,
+  MessageCircle,
+} from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -96,6 +105,7 @@ export function AdminSidebar() {
     { label: "Agenda", href: `${base}/agenda`, icon: Calendar },
     { label: "Serviços", href: `${base}/servicos`, icon: Scissors },
     { label: "Disponibilidade", href: `${base}/disponibilidade`, icon: Clock },
+    { label: "WhatsApp", href: `${base}/whatsapp`, icon: MessageCircle },
     { label: "Personalizar", href: `${base}/personalizar`, icon: Settings },
   ]
 

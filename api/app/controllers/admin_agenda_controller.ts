@@ -186,6 +186,7 @@ export default class AdminAgendaController {
       })
       invalidateSlotCacheForUser(user.id)
       await ag.load('servico')
+      await notificacao.agendamentoCancelado(ag, body.motivo ?? null)
       return response.ok(serializeAgendamentoListItem(ag))
     }
 
@@ -202,6 +203,7 @@ export default class AdminAgendaController {
       await ag.save()
       invalidateSlotCacheForUser(user.id)
       await ag.load('servico')
+      await notificacao.agendamentoConfirmadoPeloAdmin(ag)
       return response.ok(serializeAgendamentoListItem(ag))
     }
 

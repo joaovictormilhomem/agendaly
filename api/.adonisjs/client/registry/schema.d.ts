@@ -127,6 +127,30 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'public_slots.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/public/:slug/slots'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'public_bookings.store': {
+    methods: ["POST"]
+    pattern: '/api/public/:slug/agendar'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'servicos.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/admin/:slug/servicos'
@@ -170,6 +194,78 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue, ParamValue]
       params: { slug: ParamValue; id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_dashboard.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/dashboard'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_agenda.manual': {
+    methods: ["POST"]
+    pattern: '/api/admin/:slug/agenda/manual'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_agenda.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/agenda/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { slug: ParamValue; id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_agenda.update_status': {
+    methods: ["PATCH"]
+    pattern: '/api/admin/:slug/agenda/:id/status'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { slug: ParamValue; id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_agenda.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/agenda'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_slots.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/slots'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
       query: {}
       response: unknown
       errorResponse: unknown

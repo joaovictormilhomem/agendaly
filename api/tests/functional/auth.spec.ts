@@ -20,7 +20,7 @@ test.group('Auth /api/login', () => {
     const res = await client.post('/api/login').json({ email: user.email, password: '123456' })
     res.assertStatus(200)
 
-    const body = res.body()
+    const body = res.body() as { token: string; refresh_token: string }
     assert.isString(body.token)
     assert.isString(body.refresh_token)
 

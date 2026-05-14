@@ -2,6 +2,7 @@ import { BaseModel, column, hasOne, hasMany } from '@adonisjs/lucid/orm'
 import type { HasOne } from '@adonisjs/lucid/types/relations'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import Agendamento from '#models/agendamento'
 import Configuracao from '#models/configuracao'
 import Servico from '#models/servico'
 import Disponibilidade from '#models/disponibilidade'
@@ -48,6 +49,9 @@ export default class User extends BaseModel {
 
   @hasMany(() => BloqueioAgenda)
   declare bloqueios: HasMany<typeof BloqueioAgenda>
+
+  @hasMany(() => Agendamento)
+  declare agendamentos: HasMany<typeof Agendamento>
 
   get initials() {
     const [first, last] = this.name ? this.name.split(' ') : this.email.split('@')

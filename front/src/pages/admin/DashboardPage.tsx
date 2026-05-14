@@ -62,12 +62,12 @@ function AgendamentoRow({ item }: { item: Agendamento }) {
     <div className="flex items-center gap-3 py-4 border-t border-border">
       <Avatar className="h-10 w-10 shrink-0">
         <AvatarFallback className="bg-secondary text-primary text-md font-semibold">
-          {item.servico_emoji || item.cliente_nome.charAt(0)}
+          {item.servico.emoji || item.cliente_nome.charAt(0)}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground truncate">{item.cliente_nome}</p>
-        <p className="text-xs text-muted-foreground truncate">{item.servico_nome}</p>
+        <p className="text-xs text-muted-foreground truncate">{item.servico.nome}</p>
       </div>
       <div className="text-right shrink-0">
         <p className="text-sm font-semibold text-primary">{formatTime(item.data_hora_inicio)}</p>
@@ -238,7 +238,7 @@ export function DashboardPage() {
                 </p>
                 <p className="text-2xl font-bold font-playfair mb-0.5">{proximo.cliente_nome}</p>
                 <p className="text-sm opacity-85 mb-3">
-                  {proximo.servico_nome} - {formatTime(proximo.data_hora_inicio)}
+                  {proximo.servico.nome} - {formatTime(proximo.data_hora_inicio)}
                 </p>
                 <Badge className="gap-1.5 bg-white/20 text-white border-0 hover:bg-white/30">
                   <Clock className="h-3 w-3" />

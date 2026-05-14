@@ -4,17 +4,18 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { toast } from "sonner"
 import { getSlotsDisponiveis } from "@/api/public/slots"
 import type { Servico } from "@/types/servico"
 
 interface DateTimeStepProps {
   slug: string
-  service: Servico | null
+  service: Servico
   bookedDates?: Date[]
   onSelect: (date: Date, time: string) => void
 }
 
-export function DateTimeStep({ slug, service: _service, bookedDates = [], onSelect }: DateTimeStepProps) {
+export function DateTimeStep({ slug, service, bookedDates = [], onSelect }: DateTimeStepProps) {
   const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(tomorrow)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
@@ -25,11 +26,15 @@ export function DateTimeStep({ slug, service: _service, bookedDates = [], onSele
     if (!selectedDate) return
     setIsLoadingSlots(true)
     setSelectedTime(null)
-    getSlotsDisponiveis(slug, selectedDate)
-      .then(setSlots)
-      .catch(console.error)
+    getSlotsDisponiveis(slug, selectedDate, service.id)
+      .then((rows) => setSlots(rows.filter((r) => r.disponivel).map((r) => r.hora)))
+      .catch((err: unknown) => {
+        console.error(err)
+        setSlots([])
+        toast.error("Não foi possível carregar os horários. Verifique se o serviço está ativo e tente outra data.")
+      })
       .finally(() => setIsLoadingSlots(false))
-  }, [slug, selectedDate])
+  }, [slug, selectedDate, service.id])
 
   const isDateDisabled = (date: Date) => {
     const today = new Date()

@@ -7,6 +7,50 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class AgendamentoCancelamentoSchema extends BaseModel {
+  static $columns = ['agendamentoId', 'createdAt', 'id', 'motivo'] as const
+  $columns = AgendamentoCancelamentoSchema.$columns
+  @column()
+  declare agendamentoId: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare motivo: string | null
+}
+
+export class AgendamentoSchema extends BaseModel {
+  static $columns = ['clienteEmail', 'clienteNome', 'clienteWhatsapp', 'createdAt', 'dataHoraFim', 'dataHoraInicio', 'id', 'notasInternas', 'servicoId', 'status', 'statusConfirmacao', 'updatedAt', 'userId'] as const
+  $columns = AgendamentoSchema.$columns
+  @column()
+  declare clienteEmail: string | null
+  @column()
+  declare clienteNome: string
+  @column()
+  declare clienteWhatsapp: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare dataHoraFim: DateTime
+  @column.dateTime()
+  declare dataHoraInicio: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare notasInternas: string | null
+  @column()
+  declare servicoId: string
+  @column()
+  declare status: any
+  @column()
+  declare statusConfirmacao: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
+}
+
 export class AuthRefreshTokenSchema extends BaseModel {
   static $columns = ['createdAt', 'expiresAt', 'id', 'replacedBy', 'revokedAt', 'sessionId', 'tokenHash', 'userId'] as const
   $columns = AuthRefreshTokenSchema.$columns
@@ -54,6 +98,25 @@ export class BloqueiosAgendumSchema extends BaseModel {
   declare id: string
   @column()
   declare motivo: string
+  @column()
+  declare userId: string
+}
+
+export class BookingAttemptSchema extends BaseModel {
+  static $columns = ['createdAt', 'detalhes', 'id', 'resultado', 'servicoId', 'slotDatetime', 'userId'] as const
+  $columns = BookingAttemptSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare detalhes: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare resultado: string
+  @column()
+  declare servicoId: string | null
+  @column.dateTime()
+  declare slotDatetime: DateTime
   @column()
   declare userId: string
 }

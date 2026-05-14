@@ -1,5 +1,6 @@
 import Servico from '#models/servico'
 import User from '#models/user'
+import { invalidateSlotCacheForUser } from '#services/slot_engine_service'
 import { createServicoValidator, updateServicoValidator } from '#validators/servico'
 import type { HttpContext } from '@adonisjs/core/http'
 import crypto from 'node:crypto'
@@ -58,6 +59,8 @@ export default class ServicosController {
       ativo: body.ativo ?? true,
     })
 
+    invalidateSlotCacheForUser(user.id)
+
     return response.created(serializeServico(servico))
   }
 
@@ -85,6 +88,8 @@ export default class ServicosController {
 
     await servico.save()
 
+    invalidateSlotCacheForUser(user.id)
+
     return response.ok(serializeServico(servico))
   }
 
@@ -100,6 +105,8 @@ export default class ServicosController {
     if (!servico) return response.notFound({ message: 'Serviço não encontrado' })
 
     await servico.delete()
+
+    invalidateSlotCacheForUser(user.id)
 
     return response.noContent()
   }

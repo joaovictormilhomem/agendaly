@@ -93,6 +93,15 @@ Exemplo completo em `.env.example`.
 - `JWT_ACCESS_SECRET`: segredo usado para assinar o access token (JWT)
 - `JWT_REFRESH_SECRET`: atualmente presente no `.env.example`, mas o fluxo de refresh **usa token opaco persistido** (não JWT). Mantenha definido por compatibilidade/expansão futura.
 
+### WhatsApp (opcional)
+
+Integração com o serviço **`whatsapp-worker`** (veja `../whatsapp-worker/README.md`). Se omitidas, o painel indica que a integração não está configurada e **nenhuma** mensagem é enviada pelo bridge.
+
+- `WHATSAPP_BRIDGE_URL`: URL base do worker (ex.: `http://127.0.0.1:3334`)
+- `WHATSAPP_BRIDGE_SECRET`: mesmo segredo configurado como `WHATSAPP_BRIDGE_SECRET` no worker (enviado como Bearer nas chamadas server-to-server)
+
+Rotas admin relacionadas: `GET/POST` em `/api/admin/:slug/whatsapp/*` (JWT). A lógica de notificação aos clientes está em `app/services/notificacao_agendamento_service.ts` e usa `WhatsappBridgeService`.
+
 ## Autenticação
 
 O fluxo atual é:

@@ -33,17 +33,22 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
 }
 
+function formatDate(iso: string) {
+  return format(new Date(iso), "EEE d/MM", { locale: ptBR })
+}
+
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 interface AgendamentoCardProps {
   item: Agendamento
+  showDate?: boolean
   onDetalhes: (item: Agendamento) => void
   onCancelar: (item: Agendamento) => void
 }
 
-function AgendamentoCard({ item, onDetalhes, onCancelar }: AgendamentoCardProps) {
+function AgendamentoCard({ item, showDate, onDetalhes, onCancelar }: AgendamentoCardProps) {
   const inicio = formatTime(item.data_hora_inicio)
   const fim = formatTime(item.data_hora_fim)
   const isCancelado = item.status === "CANCELADO"
@@ -53,6 +58,9 @@ function AgendamentoCard({ item, onDetalhes, onCancelar }: AgendamentoCardProps)
       <div className="w-16 shrink-0 text-right">
         <p className="text-sm font-semibold text-primary">{inicio}</p>
         <p className="text-xs text-muted-foreground">{fim}</p>
+        {showDate && (
+          <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.data_hora_inicio)}</p>
+        )}
       </div>
 
       <div className="flex flex-col items-center gap-1 shrink-0">
@@ -283,6 +291,7 @@ export function AgendaPage() {
                 <AgendamentoCard
                   key={item.id}
                   item={item}
+                  showDate={viewMode !== "dia"}
                   onDetalhes={setDetalhesItem}
                   onCancelar={setCancelarItem}
                 />

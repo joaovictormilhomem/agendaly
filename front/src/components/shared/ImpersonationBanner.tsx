@@ -1,16 +1,19 @@
 import { AlertTriangle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
 
 export function ImpersonationBanner() {
   const { impersonating, stopImpersonation } = useAuth()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   if (!impersonating) return null
 
   function handleStop() {
     stopImpersonation()
+    queryClient.clear()
     navigate("/master/dashboard")
   }
 

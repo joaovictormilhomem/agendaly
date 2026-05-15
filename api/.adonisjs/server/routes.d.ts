@@ -7,6 +7,7 @@ export type ScannedRoutes = {
     'auth.login': { paramsTuple?: []; params?: {} }
     'auth.refresh': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
+    'auth.change_password': { paramsTuple?: []; params?: {} }
     'users.index': { paramsTuple?: []; params?: {} }
     'users.impersonate': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
@@ -72,6 +73,10 @@ export type ScannedRoutes = {
     'admin_whatsapp.conectar': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_whatsapp.desconectar': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
+  PATCH: {
+    'auth.change_password': { paramsTuple?: []; params?: {} }
+    'admin_agenda.update_status': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
+  }
   PUT: {
     'profile.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.update': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
@@ -79,9 +84,6 @@ export type ScannedRoutes = {
   }
   DELETE: {
     'servicos.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
-  }
-  PATCH: {
-    'admin_agenda.update_status': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {

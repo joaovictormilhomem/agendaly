@@ -28,15 +28,17 @@ router.get('/', () => {
 router.post('/api/login', [AuthController, 'login'])
 router.post('/api/refresh', [AuthController, 'refresh'])
 router.post('/api/logout', [AuthController, 'logout']).use(middleware.jwtAuth())
+router.patch('/api/me/senha', [AuthController, 'changePassword']).use(middleware.jwtAuth())
 
 router.get('/api/me', async ({ authJwt, response }) => {
   if (!authJwt) return response.unauthorized()
+  const user = authJwt.user
   return response.ok({
-    id: authJwt.user.id,
-    role: authJwt.user.role,
-    slug: authJwt.user.slug,
-    email: authJwt.user.email,
-    name: authJwt.user.name,
+    id: user.id,
+    role: user.role,
+    slug: user.slug,
+    email: user.email,
+    name: user.name,
   })
 }).use(middleware.jwtAuth())
 

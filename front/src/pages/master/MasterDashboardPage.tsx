@@ -58,6 +58,13 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR")
 }
 
+function maskPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11)
+  if (digits.length <= 10)
+    return digits.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3").replace(/-$/, "")
+  return digits.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3").replace(/-$/, "")
+}
+
 export function MasterDashboardPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -83,6 +90,7 @@ export function MasterDashboardPage() {
     mutationFn: (profissional: Profissional) => impersonateProfissional(profissional.slug),
     onSuccess: ({ token }, profissional) => {
       startImpersonation(profissional, token)
+      queryClient.clear()
       navigate(`/admin/${profissional.slug}/dashboard`)
     },
   })
@@ -191,7 +199,17 @@ export function MasterDashboardPage() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="whatsapp_contato">WhatsApp</Label>
-                <Input id="whatsapp_contato" placeholder="(63) 99999-9999" aria-invalid={!!errors.whatsapp_contato} {...register("whatsapp_contato")} className="bg-white"/>
+                <Input
+                  id="whatsapp_contato"
+                  placeholder="(63) 99999-9999"
+                  aria-invalid={!!errors.whatsapp_contato}
+                  className="bg-white"
+                  {...register("whatsapp_contato", {
+                    onChange: (e) => {
+                      e.target.value = maskPhone(e.target.value)
+                    },
+                  })}
+                />
                 {errors.whatsapp_contato && (
                   <p className="text-xs text-destructive">{errors.whatsapp_contato.message}</p>
                 )}

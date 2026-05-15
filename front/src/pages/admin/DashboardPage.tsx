@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useParams, useNavigate } from "react-router-dom"
-import { Clock, Scissors, Settings, ChevronRight, X, AlertCircle } from "lucide-react"
+import { Clock, Scissors, Settings, ChevronRight, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,6 @@ import { useAuth } from "@/hooks/useAuth"
 import { StatusChip } from "@/components/shared/StatusChip"
 import { cn } from "@/lib/utils"
 import type { Agendamento } from "@/types/agenda"
-import { useState } from "react"
 
 function greeting() {
   const h = new Date().getHours()
@@ -79,9 +78,7 @@ function AgendamentoRow({ item }: { item: Agendamento }) {
 
 export function DashboardPage() {
   const { slug } = useParams<{ slug: string }>()
-  const { user } = useAuth()
   const navigate = useNavigate()
-  const [bannerDismissed, setBannerDismissed] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard", slug],
@@ -95,20 +92,21 @@ export function DashboardPage() {
     enabled: !!slug,
   })
 
+  const { user } = useAuth()
   const proximo = data?.proximo_atendimento
   const mins = proximo ? minutesUntil(proximo.data_hora_inicio) : null
-  const showBanner = !bannerDismissed && perfil?.primeira_visita === true
+  const showBanner = perfil?.primeira_visita === true
 
   return (
     <div className="space-y-6 max-w-5xl">
-      {/* First-visit pending banner */}
+      {/* Pending banner */}
       {showBanner && (
         <div className="flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 p-4">
           <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-sm font-semibold text-foreground">Você tem pendências antes de publicar sua página</p>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Recomendamos que você <span className="font-medium text-foreground">altere sua senha</span> no primeiro acesso e{" "}
+              Recomendamos que você{" "}
               <button
                 type="button"
                 onClick={() => navigate(`/admin/${slug}/personalizar`)}
@@ -119,13 +117,6 @@ export function DashboardPage() {
               antes de compartilhar com seus clientes.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setBannerDismissed(true)}
-            className="text-muted-foreground hover:text-foreground shrink-0"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
       )}
 
@@ -173,7 +164,7 @@ export function DashboardPage() {
         <Card className="border border-border flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2 shrink-0">
             <CardTitle className="text-base font-semibold font-playfair">Agenda de hoje</CardTitle>
-            <Button variant="ghost" size="sm" className="text-xs gap-1 rounded-full" style={{ color: "#2C2025" }}>
+            <Button variant="ghost" size="sm" className="text-xs gap-1 rounded-full" style={{ color: "#2C2025" }} onClick={() => navigate(`/admin/${slug}/agenda`)}>
               Ver tudo <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </CardHeader>
@@ -249,6 +240,7 @@ export function DashboardPage() {
           ) : null}
         </div>
       </div>
+
     </div>
   )
 }

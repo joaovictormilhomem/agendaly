@@ -15,6 +15,5 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string
-  refresh_token: string
   user: AuthUser
 }

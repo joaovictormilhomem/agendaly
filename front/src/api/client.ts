@@ -6,6 +6,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000"
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
+  withCredentials: true,
 })
 
 apiClient.interceptors.request.use((config) => {
@@ -23,21 +24,15 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config
 
     if (error.response?.status === 401 && store.token && !originalRequest._retry) {
-      if (!store.refreshToken) {
-        store.logout()
-        window.location.href = "/login"
-        return Promise.reject(error)
-      }
-
       originalRequest._retry = true
 
       try {
-        const { data } = await axios.post<{ token: string; refresh_token: string }>(
+        const { data } = await axios.post<{ token: string }>(
           `${BASE_URL}/api/refresh`,
-          { refresh_token: store.refreshToken },
-          { headers: { "Content-Type": "application/json" } }
+          {},
+          { headers: { "Content-Type": "application/json" }, withCredentials: true }
         )
-        store.setTokens(data.token, data.refresh_token)
+        store.setToken(data.token)
         originalRequest.headers.Authorization = `Bearer ${data.token}`
         return apiClient(originalRequest)
       } catch {

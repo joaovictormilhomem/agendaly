@@ -37,8 +37,8 @@ export function LoginPage() {
 
   const mutation = useMutation({
     mutationFn: loginUser,
-    onSuccess: ({ token, refresh_token, user }) => {
-      login(token, refresh_token, user)
+    onSuccess: ({ token, user }) => {
+      login(token, user)
       if (user.role === "SUPERADMIN") {
         navigate("/master/dashboard")
       } else {
@@ -133,6 +133,7 @@ export function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   className="pr-10 bg-white"
+                  placeholder="Digite sua senha"
                   aria-invalid={!!errors.senha}
                   {...register("senha")}
                 />
@@ -148,13 +149,6 @@ export function LoginPage() {
               {errors.senha && (
                 <p className="text-xs text-destructive">{errors.senha.message}</p>
               )}
-              <button
-                type="button"
-                className="text-xs text-primary hover:underline block ml-auto"
-                onClick={() => {/* future: forgot password flow */}}
-              >
-                Esqueci minha senha
-              </button>
             </div>
 
             <Button

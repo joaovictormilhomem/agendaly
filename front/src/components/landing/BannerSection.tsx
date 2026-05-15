@@ -14,7 +14,7 @@ export function BannerSection({ perfil, slug }: Props) {
     >
       <div
         className="max-w-3xl mx-auto rounded-2xl py-14 px-8 text-center space-y-4"
-        style={{ background: "linear-gradient(145deg, #C05C6E 0%, #D57C8D 50%, #E09AAA 100%)" }}
+        style={{ background: "linear-gradient(145deg, var(--color-primary) 0%, var(--color-secondary) 100%)" }}
       >
         {perfil.banner_titulo && (
           <h2 className="text-3xl sm:text-4xl font-bold font-playfair text-white">

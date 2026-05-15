@@ -67,7 +67,7 @@ export function HeroSection({ perfil, slug }: Props) {
         <div className="flex justify-center lg:justify-end justify-self-center lg:justify-self-end">
           <div className="w-full max-w-xs rounded-2xl overflow-hidden shadow-md bg-white border border-border/40 flex flex-col">
             {/* Rose header */}
-            <div className="h-20" style={{ background: "linear-gradient(145deg, #C05C6E 0%, #D57C8D 50%, #E09AAA 100%)" }} />
+            <div className="h-20" style={{ background: "linear-gradient(145deg, var(--color-primary) 0%, var(--color-secondary) 100%)" }} />
             {/* Overlapping avatar */}
             <div className="flex justify-center -mt-8">
               <div

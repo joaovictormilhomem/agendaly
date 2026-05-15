@@ -43,6 +43,18 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'auth.change_password': {
+    methods: ["PATCH"]
+    pattern: '/api/me/senha'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'users.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/users'

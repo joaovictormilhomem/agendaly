@@ -19,3 +19,10 @@ export const logoutValidator = vine.compile(
   })
 )
 
+export const changePasswordValidator = vine.compile(
+  vine.object({
+    senha_atual: vine.string(),
+    nova_senha: vine.string().minLength(6),
+  })
+)
+

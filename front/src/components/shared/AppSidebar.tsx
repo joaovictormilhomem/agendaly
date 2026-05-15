@@ -8,6 +8,7 @@ import {
   LogOut,
   CalendarHeart,
   MessageCircle,
+  KeyRound,
 } from "lucide-react"
 import {
   Sidebar,
@@ -21,6 +22,8 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
+import { useState } from "react"
+import { AlterarSenhaDialog } from "@/components/admin/AlterarSenhaDialog"
 
 interface NavItem {
   label: string
@@ -33,11 +36,13 @@ interface AppSidebarProps {
   businessName: string
   businessTagline?: string
   initial?: string
+  showAlterarSenha?: boolean
 }
 
-export function AppSidebar({ navItems, businessName, businessTagline, initial }: AppSidebarProps) {
+export function AppSidebar({ navItems, businessName, businessTagline, initial, showAlterarSenha }: AppSidebarProps) {
   const location = useLocation()
   const { logout } = useAuth()
+  const [senhaOpen, setSenhaOpen] = useState(false)
 
   return (
     <Sidebar collapsible="offcanvas" className="min-h-svh border-r">
@@ -83,6 +88,14 @@ export function AppSidebar({ navItems, businessName, businessTagline, initial }:
 
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
+          {showAlterarSenha && (
+            <SidebarMenuItem>
+              <SidebarMenuButton onClick={() => setSenhaOpen(true)} className="text-muted-foreground hover:text-foreground">
+                <KeyRound />
+                Alterar senha
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton onClick={logout} className="text-muted-foreground hover:text-foreground">
               <LogOut />
@@ -91,6 +104,10 @@ export function AppSidebar({ navItems, businessName, businessTagline, initial }:
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      {showAlterarSenha && (
+        <AlterarSenhaDialog open={senhaOpen} onOpenChange={setSenhaOpen} />
+      )}
     </Sidebar>
   )
 }
@@ -114,6 +131,7 @@ export function AdminSidebar() {
       navItems={navItems}
       businessName={user?.nome ?? "Painel"}
       businessTagline="Painel Admin"
+      showAlterarSenha
     />
   )
 }

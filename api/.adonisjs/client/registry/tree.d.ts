@@ -6,6 +6,7 @@ export interface ApiDefinition {
     login: typeof routes['auth.login']
     refresh: typeof routes['auth.refresh']
     logout: typeof routes['auth.logout']
+    changePassword: typeof routes['auth.change_password']
   }
   users: {
     index: typeof routes['users.index']

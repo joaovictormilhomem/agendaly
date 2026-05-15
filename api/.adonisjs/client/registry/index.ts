@@ -24,6 +24,12 @@ const routes = {
     tokens: [{"old":"/api/logout","type":0,"val":"api","end":""},{"old":"/api/logout","type":0,"val":"logout","end":""}],
     types: placeholder as Registry['auth.logout']['types'],
   },
+  'auth.change_password': {
+    methods: ["PATCH"],
+    pattern: '/api/me/senha',
+    tokens: [{"old":"/api/me/senha","type":0,"val":"api","end":""},{"old":"/api/me/senha","type":0,"val":"me","end":""},{"old":"/api/me/senha","type":0,"val":"senha","end":""}],
+    types: placeholder as Registry['auth.change_password']['types'],
+  },
   'users.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/users',

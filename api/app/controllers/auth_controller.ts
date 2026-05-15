@@ -7,9 +7,19 @@ import hash from '@adonisjs/core/services/hash'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
-import { loginValidator, logoutValidator, refreshValidator } from '#validators/auth'
+import { changePasswordValidator, loginValidator } from '#validators/auth'
 
 export default class AuthController {
+  private setRefreshCookie(response: HttpContext['response'], token: string) {
+    response.cookie('refresh_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/',
+    })
+  }
+
   async login({ request, response }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
 
@@ -50,16 +60,17 @@ export default class AuthController {
       expiresAt: now.plus({ days: 7 }),
     })
 
-    return response.ok({
-      token,
-      refresh_token: refreshToken,
-    })
+    this.setRefreshCookie(response, refreshToken)
+    return response.ok({ token })
   }
 
   async refresh({ request, response }: HttpContext) {
-    const { refresh_token } = await request.validateUsing(refreshValidator)
+    const refreshToken = request.cookie('refresh_token')
+    if (!refreshToken) {
+      return response.unauthorized({ message: 'Refresh token ausente' })
+    }
 
-    const current = await RefreshTokenService.findValidByToken(refresh_token)
+    const current = await RefreshTokenService.findValidByToken(refreshToken)
     if (!current) {
       return response.unauthorized({ message: 'Refresh token inválido' })
     }
@@ -74,7 +85,6 @@ export default class AuthController {
       return response.unauthorized({ message: 'Usuário não encontrado' })
     }
 
-    // rotate token
     const now = DateTime.utc()
     const newRefreshToken = RefreshTokenService.createOpaqueToken()
     const newId = crypto.randomUUID()
@@ -100,22 +110,35 @@ export default class AuthController {
       sid: session.id,
     })
 
-    return response.ok({
-      token,
-      refresh_token: newRefreshToken,
-    })
+    this.setRefreshCookie(response, newRefreshToken)
+    return response.ok({ token })
+  }
+
+  async changePassword({ request, response, authJwt }: HttpContext) {
+    if (!authJwt) return response.unauthorized()
+
+    const { senha_atual, nova_senha } = await request.validateUsing(changePasswordValidator)
+
+    const user = authJwt.user
+
+    const ok = await hash.verify(user.passwordHash, senha_atual)
+    if (!ok) return response.unprocessableEntity({ message: 'Senha atual incorreta' })
+
+    user.passwordHash = await hash.make(nova_senha)
+    await user.save()
+
+    return response.ok({ message: 'Senha alterada com sucesso' })
   }
 
   async logout({ request, response, authJwt }: HttpContext) {
-    const { refresh_token } = await request.validateUsing(logoutValidator)
-
     if (authJwt?.session) {
       authJwt.session.revokedAt = DateTime.utc()
       await authJwt.session.save()
     }
 
-    if (refresh_token) {
-      const tokenHash = RefreshTokenService.hashToken(refresh_token)
+    const refreshToken = request.cookie('refresh_token')
+    if (refreshToken) {
+      const tokenHash = RefreshTokenService.hashToken(refreshToken)
       const refreshRow = await AuthRefreshToken.query().where('token_hash', tokenHash).first()
       if (refreshRow && !refreshRow.revokedAt) {
         refreshRow.revokedAt = DateTime.utc()
@@ -123,6 +146,7 @@ export default class AuthController {
       }
     }
 
+    response.clearCookie('refresh_token', { path: '/' })
     return response.ok({ message: 'Logout efetuado' })
   }
 }

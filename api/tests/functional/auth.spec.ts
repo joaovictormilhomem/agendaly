@@ -20,9 +20,13 @@ test.group('Auth /api/login', () => {
     const res = await client.post('/api/login').json({ email: user.email, password: '123456' })
     res.assertStatus(200)
 
-    const body = res.body() as { token: string; refresh_token: string }
+    const body = res.body() as { token: string; refresh_token?: string }
     assert.isString(body.token)
-    assert.isString(body.refresh_token)
+    assert.isUndefined(body.refresh_token)
+
+    const setCookie = res.headers()['set-cookie']
+    const cookieHeader = Array.isArray(setCookie) ? setCookie.join('; ') : String(setCookie ?? '')
+    assert.include(cookieHeader.toLowerCase(), 'refresh_token=')
 
     const decoded = await JwtService.verifyAccessToken(body.token)
     assert.equal(decoded.role, 'PROFISSIONAL')

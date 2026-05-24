@@ -2,22 +2,27 @@
 
 API HTTP do Agendaly, construída com **AdonisJS (v7)** + **TypeScript** e **PostgreSQL**.
 
-## Status (o que existe hoje)
+## O que existe hoje
 
-No momento, a API expõe endpoints de **autenticação via JWT + refresh token** e um endpoint para consultar o usuário autenticado:
+A API cobre autenticação, gestão de profissionais (SUPERADMIN), perfil e landing, serviços, disponibilidade, slots, agendamentos (público e admin), dashboard, notificações WhatsApp (via worker) e integração com o painel.
 
-- `GET /` (healthcheck)
-- `POST /api/login`
-- `POST /api/refresh`
-- `POST /api/logout` (requer JWT)
-- `GET /api/me` (requer JWT)
-- `POST /api/users` (requer JWT + role `SUPERADMIN`)
+Rotas definidas em `start/routes.ts`.
 
-As rotas ficam em `start/routes.ts`.
+### Resumo por área
+
+| Área | Autenticação | Rotas |
+|------|----------------|-------|
+| Health | — | `GET /` |
+| Auth | cookie + JWT | `POST /api/login`, `POST /api/refresh`, `POST /api/logout`, `PATCH /api/me/senha`, `GET /api/me` |
+| Usuários (SUPERADMIN) | JWT | `GET /api/users`, `POST /api/users`, `POST /api/users/impersonate/:slug` |
+| Público (`:slug`) | — | `GET /api/public/:slug/perfil`, `servicos`, `slots`; `POST /api/public/:slug/agendar` |
+| Admin (`:slug`) | JWT | perfil, serviços, dashboard, agenda, slots, disponibilidade, WhatsApp |
+
+Detalhes de auth e exemplos abaixo; demais handlers em `app/controllers/`.
 
 ## Requisitos
 
-- Node.js (recomendado LTS)
+- Node.js 20+ (recomendado LTS)
 - PostgreSQL
 - npm
 
@@ -27,25 +32,28 @@ Dentro da pasta `api/`:
 
 ```bash
 npm install
-```
-
-Crie seu `.env`:
-
-```bash
-copy .env.example .env
+cp .env.example .env
 ```
 
 Preencha pelo menos:
 
-- `APP_KEY` (use uma chave forte, >= 32 chars)
+- `APP_KEY` (chave forte, >= 32 caracteres)
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_DATABASE`
-- `JWT_ACCESS_SECRET` (>= 32 chars)
+- `JWT_ACCESS_SECRET` (>= 32 caracteres)
 
-Rode as migrations:
+Migrations e dados de demonstração (opcional):
 
 ```bash
 node ace migration:run
+node ace db:seed
 ```
+
+O seeder `database/seeders/user_seeder.ts` cria:
+
+| E-mail | Senha | Perfil | Slug |
+|--------|-------|--------|------|
+| `superadmin@agendaly.com` | `admin123456` | SUPERADMIN | `superadmin` |
+| `prof@agendaly.com` | `prof123456` | PROFISSIONAL | `prof-demo` |
 
 Suba a API:
 
@@ -53,9 +61,9 @@ Suba a API:
 npm run dev
 ```
 
-Por padrão:
+Por padrão: **http://localhost:3333**
 
-- **URL**: `http://localhost:3333`
+Em desenvolvimento, o CORS aceita qualquer origem com `credentials: true` (`config/cors.ts`), para o front enviar cookies de refresh em `localhost:5173`.
 
 ## Scripts úteis
 
@@ -67,6 +75,7 @@ npm test           # testes
 npm run lint       # eslint
 npm run typecheck  # tsc --noEmit
 npm run format     # prettier
+node ace db:seed   # dados de demo
 ```
 
 ## Variáveis de ambiente
@@ -75,127 +84,88 @@ Exemplo completo em `.env.example`.
 
 ### App
 
-- `TZ`: timezone (ex: `UTC`)
-- `PORT`: porta HTTP (ex: `3333`)
-- `HOST`: host de bind (ex: `localhost`)
-- `NODE_ENV`: `development` | `production` | `test`
-- `LOG_LEVEL`: `info`, `debug`, etc.
-- `APP_KEY`: chave do app (obrigatória)
-- `APP_URL`: URL base (ex: `http://${HOST}:${PORT}`)
+- `TZ`, `PORT`, `HOST`, `NODE_ENV`, `LOG_LEVEL`, `APP_KEY`, `APP_URL`
 
 ### Banco (PostgreSQL)
 
-- `DB_CONNECTION`: `pg`
-- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_DATABASE`
+- `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_DATABASE`
 
-### Auth (JWT)
+### Auth
 
-- `JWT_ACCESS_SECRET`: segredo usado para assinar o access token (JWT)
-- `JWT_REFRESH_SECRET`: atualmente presente no `.env.example`, mas o fluxo de refresh **usa token opaco persistido** (não JWT). Mantenha definido por compatibilidade/expansão futura.
+- `JWT_ACCESS_SECRET`: assina o access token (JWT)
+- `JWT_REFRESH_SECRET`: presente no `.env.example`; o refresh atual usa **token opaco em cookie**, não JWT. Mantenha por compatibilidade.
 
 ### WhatsApp (opcional)
 
-Integração com o serviço **`whatsapp-worker`** (veja `../whatsapp-worker/README.md`). Se omitidas, o painel indica que a integração não está configurada e **nenhuma** mensagem é enviada pelo bridge.
+Integração com **`whatsapp-worker`** (`../whatsapp-worker/README.md`). Sem configurar, o painel indica integração desligada e nenhuma mensagem é enviada.
 
-- `WHATSAPP_BRIDGE_URL`: URL base do worker (ex.: `http://127.0.0.1:3334`)
-- `WHATSAPP_BRIDGE_SECRET`: mesmo segredo configurado como `WHATSAPP_BRIDGE_SECRET` no worker (enviado como Bearer nas chamadas server-to-server)
+- `WHATSAPP_BRIDGE_URL` — ex.: `http://127.0.0.1:3334`
+- `WHATSAPP_BRIDGE_SECRET` — mesmo valor do worker (Bearer server-to-server)
 
-Rotas admin relacionadas: `GET/POST` em `/api/admin/:slug/whatsapp/*` (JWT). A lógica de notificação aos clientes está em `app/services/notificacao_agendamento_service.ts` e usa `WhatsappBridgeService`.
+Rotas admin:
+
+- `GET /api/admin/:slug/whatsapp/status`
+- `POST /api/admin/:slug/whatsapp/conectar`
+- `POST /api/admin/:slug/whatsapp/desconectar`
+
+Notificações ao cliente: `app/services/notificacao_agendamento_service.ts` + `WhatsappBridgeService`.
 
 ## Autenticação
 
-O fluxo atual é:
+Fluxo pensado para SPA com **cookie httpOnly** no refresh e **JWT no header** no access token.
 
-1. `POST /api/login` retorna:
-   - `token`: JWT (access token)
-   - `refresh_token`: token opaco para rotação
-2. Para endpoints protegidos, envie o header:
-   - `Authorization: Bearer <token>`
-3. Quando o access token expirar, use `POST /api/refresh` com `refresh_token` para obter um novo par.
-4. Para encerrar, `POST /api/logout` (requer JWT) e envie o `refresh_token` para revogar também.
+1. `POST /api/login` com `email` e `password`:
+   - Resposta JSON: `{ "token": "<jwt>" }`
+   - Cookie `refresh_token` (httpOnly, `SameSite=Lax`, 7 dias)
+2. Endpoints protegidos: `Authorization: Bearer <token>`
+3. Renovar access token: `POST /api/refresh` **com o cookie** (body vazio; `credentials: 'include'` no browser)
+4. Logout: `POST /api/logout` com JWT; revoga sessão e limpa o cookie
 
-## Endpoints
+Claims do JWT: `role`, `user_id`, `slug`, `email`, `name`, `sid` (id da sessão server-side).
 
-### Healthcheck
+### Endpoints de auth (detalhe)
 
 #### `GET /`
-
-Resposta:
 
 ```json
 { "hello": "world" }
 ```
 
-### Login
-
 #### `POST /api/login`
 
-Body (JSON):
+Body:
 
 ```json
-{ "email": "prof@exemplo.com", "password": "my-password" }
+{ "email": "prof@agendaly.com", "password": "prof123456" }
 ```
 
 Resposta 200:
 
 ```json
-{
-  "token": "eyJhbGciOi...",
-  "refresh_token": "opaque_refresh_token"
-}
+{ "token": "eyJhbGciOi..." }
 ```
 
-O `token` (JWT) contém os dados necessários para o frontend decidir o redirecionamento, via claims:
++ header `Set-Cookie: refresh_token=...`
 
-- `role`: `SUPERADMIN` | `PROFISSIONAL`
-- `user_id`: UUID do usuário
-- `slug`: slug do usuário
-- `email`: email do usuário
-- `name`: user name
-- `sid`: id da sessão (server-side)
-
-Erros comuns:
-
-- `401`: `{ "message": "Credenciais inválidas" }`
-
-### Refresh
+Erros: `401` `{ "message": "Credenciais inválidas" }`
 
 #### `POST /api/refresh`
 
-Body (JSON):
-
-```json
-{ "refresh_token": "opaque_refresh_token" }
-```
+Sem body. Requer cookie `refresh_token`.
 
 Resposta 200:
 
 ```json
-{
-  "token": "novo_jwt",
-  "refresh_token": "novo_refresh_token"
-}
+{ "token": "novo_jwt" }
 ```
 
-Erros comuns:
++ novo cookie `refresh_token`
 
-- `401`: `{ "message": "Refresh token inválido" }`
-- `401`: `{ "message": "Sessão inválida" }`
-- `401`: `{ "message": "Usuário não encontrado" }`
-
-### Logout (protegido)
+Erros: `401` (`Refresh token ausente`, `Refresh token inválido`, `Sessão inválida`, `Usuário não encontrado`)
 
 #### `POST /api/logout`
 
-Headers:
-
-- `Authorization: Bearer <token>`
-
-Body (JSON):
-
-```json
-{ "refresh_token": "opaque_refresh_token" }
-```
+Header: `Authorization: Bearer <token>`
 
 Resposta 200:
 
@@ -203,35 +173,27 @@ Resposta 200:
 { "message": "Logout efetuado" }
 ```
 
-### Me (protegido)
+#### `PATCH /api/me/senha`
+
+Body: `{ "senha_atual": "...", "nova_senha": "..." }`
 
 #### `GET /api/me`
-
-Headers:
-
-- `Authorization: Bearer <token>`
 
 Resposta 200:
 
 ```json
-{ "id": "<uuid>", "role": "SUPERADMIN", "slug": "<slug>", "email": "user@exemplo.com", "name": "Name" }
+{ "id": "<uuid>", "role": "PROFISSIONAL", "slug": "prof-demo", "email": "...", "name": "..." }
 ```
 
-Resposta 401:
+### SUPERADMIN — usuários
 
-```json
-{ "message": "Unauthorized" }
-```
+#### `GET /api/users`
 
-### Criar usuário (protegido - SUPERADMIN)
+Lista profissionais (`role: PROFISSIONAL`).
 
 #### `POST /api/users`
 
-Headers:
-
-- `Authorization: Bearer <token>`
-
-Body (JSON):
+Body:
 
 ```json
 {
@@ -243,28 +205,45 @@ Body (JSON):
 }
 ```
 
-Resposta 201:
+Resposta `201` com `id`, `name`, `email`, `slug`, `role`, `created_at`.
 
-```json
-{
-  "id": "<uuid>",
-  "name": "Maria",
-  "email": "maria@exemplo.com",
-  "slug": "maria-estetica",
-  "role": "PROFISSIONAL",
-  "created_at": "2026-01-01T00:00:00.000Z"
-}
-```
+#### `POST /api/users/impersonate/:slug`
 
-Erros comuns:
+Retorna `{ "token": "<jwt>" }` da profissional (sem novo refresh cookie).
 
-- `403`: `{ "message": "Acesso restrito a SUPERADMIN" }`
-- `401`: `{ "message": "Missing Bearer token" }` / `{ "message": "Invalid or expired token" }`
-- `422`: erros de validação (ex.: email/slug duplicados)
+### Público (`/api/public/:slug/...`)
+
+Sem JWT. `:slug` identifica a profissional.
+
+| Método | Rota | Uso |
+|--------|------|-----|
+| `GET` | `/perfil` | Dados da landing |
+| `GET` | `/servicos` | Serviços ativos |
+| `GET` | `/slots` | Horários disponíveis (query: serviço, data) |
+| `POST` | `/agendar` | Novo agendamento pelo cliente |
+
+### Admin (`/api/admin/:slug/...`)
+
+JWT obrigatório. Acesso ao próprio `slug` ou SUPERADMIN.
+
+| Método | Rota | Uso |
+|--------|------|-----|
+| `GET` / `PUT` | `/perfil` | Configuração da landing |
+| `GET` / `POST` / `PUT` / `DELETE` | `/servicos`, `/servicos/:id` | CRUD serviços |
+| `GET` | `/dashboard` | Métricas do painel |
+| `GET` | `/agenda` | Listagem (filtros por data/status) |
+| `GET` | `/agenda/:id` | Detalhe |
+| `POST` | `/agenda/manual` | Agendamento manual |
+| `PATCH` | `/agenda/:id/status` | Confirmar / cancelar |
+| `GET` | `/slots` | Slots para o admin |
+| `GET` / `PUT` | `/disponibilidade` | Grade semanal |
+| `GET` | `/whatsapp/status` | Estado da sessão WA |
+| `POST` | `/whatsapp/conectar` | Inicia sessão / QR |
+| `POST` | `/whatsapp/desconectar` | Encerra sessão |
 
 ## Testes
 
-O arquivo `.env.test` já documenta a intenção de usar um **banco dedicado** para `npm test`.
+Use banco dedicado (ver comentários em `.env.test` / `.env.example`).
 
 ```bash
 npm test
@@ -272,9 +251,10 @@ npm test
 
 ## Estrutura (alto nível)
 
-- `start/routes.ts`: rotas HTTP
-- `app/controllers/`: handlers dos endpoints
-- `app/middleware/`: autenticação/validações de request
-- `database/migrations/`: migrations do Postgres (Lucid)
-- `app/services/`: JWT e refresh token
-
+- `start/routes.ts` — rotas HTTP
+- `app/controllers/` — handlers
+- `app/middleware/` — JWT, SUPERADMIN, validação de slug
+- `app/services/` — JWT, refresh, slots, notificações WhatsApp
+- `app/models/` — Lucid (users, serviços, agendamentos, etc.)
+- `database/migrations/` — schema PostgreSQL
+- `database/seeders/` — dados de demonstração

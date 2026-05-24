@@ -35,7 +35,7 @@ npm run dev
 
 ```bash
 npm install   # aplica também patch-package (postinstall)
-npm run dev   # node --watch: reinicia ao editar server.js
+npm run dev   # node --watch: reinicia ao editar src/server.js
 npm start     # produção simples
 ```
 

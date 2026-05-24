@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import { CalendarDays, MapPin, Instagram, MessageCircle } from "lucide-react"
 import type { Perfil } from "@/types/perfil"
+import { ProfileLogo } from "@/components/landing/ProfileLogo"
 
 function instagramUrl(handle: string) {
   return `https://instagram.com/${handle.replace(/^@/, "")}`
@@ -16,7 +17,7 @@ interface Props {
 }
 
 export function HeroSection({ perfil, slug }: Props) {
-  const initial = (perfil.nome_profissional || perfil.nome_exibicao)[0]?.toUpperCase() ?? "N"
+  const displayName = perfil.nome_profissional || perfil.nome_exibicao
 
   return (
     <div className="pt-16">
@@ -70,12 +71,7 @@ export function HeroSection({ perfil, slug }: Props) {
             <div className="h-20" style={{ background: "linear-gradient(145deg, var(--color-primary) 0%, var(--color-secondary) 100%)" }} />
             {/* Overlapping avatar */}
             <div className="flex justify-center -mt-8">
-              <div
-                className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center text-3xl font-bold font-playfair"
-                style={{ background: "var(--color-secondary)", color: "var(--color-primary)" }}
-              >
-                {initial}
-              </div>
+              <ProfileLogo logoUrl={perfil.logo_url} name={displayName} variant="hero" />
             </div>
             {/* Body */}
             <div className="px-6 pb-6 pt-3 text-center space-y-4 flex-1 flex flex-col justify-between">

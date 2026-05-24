@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { CalendarDays, Menu } from "lucide-react"
 import type { Perfil } from "@/types/perfil"
+import { ProfileLogo } from "@/components/landing/ProfileLogo"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/store/authStore"
@@ -12,7 +13,7 @@ interface Props {
 }
 
 export function LandingNavbar({ perfil, slug }: Props) {
-  const initial = (perfil.nome_profissional || perfil.nome_exibicao)[0]?.toUpperCase() ?? "N"
+  const displayName = perfil.nome_profissional || perfil.nome_exibicao
   const [open, setOpen] = useState(false)
   const { user } = useAuthStore()
 
@@ -25,13 +26,13 @@ export function LandingNavbar({ perfil, slug }: Props) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between border-b border-border px-6 lg:px-12 bg-beige">
       <div className="flex items-center gap-2.5">
-        <div
-          className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-          style={{ background: "var(--color-primary)" }}
-        >
-          {initial}
+        <ProfileLogo logoUrl={perfil.logo_url} name={displayName} variant="navbar" />
+        <div className="min-w-0">
+          <span className="font-semibold text-foreground font-playfair block truncate">{perfil.nome_exibicao}</span>
+          {perfil.tagline && (
+            <span className="text-xs text-muted-foreground block truncate">{perfil.tagline}</span>
+          )}
         </div>
-        <span className="font-semibold text-foreground font-playfair">{perfil.nome_exibicao}</span>
       </div>
 
       {/* Desktop Menu */}

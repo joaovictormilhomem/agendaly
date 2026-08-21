@@ -130,7 +130,7 @@ export const adminHandlers = [
       data_hora_fim: fim.toISOString(),
       status: "CONFIRMADO",
       status_confirmacao: "manual_admin",
-      notas_internas: body.notas_internas,
+      notas_internas: body.notas_internas ?? null,
       created_at: new Date().toISOString(),
     }
 

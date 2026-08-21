@@ -42,7 +42,7 @@ export const servicosMock: Servico[] = [
     nome: "Nail Art",
     emoji: "🎨",
     descricao: "Arte personalizada nas unhas, por unidade ou kit completo.",
-    duracao_minutos: 40,
+    duracao_minutos: 45,
     preco: 50,
     ativo: true,
   },

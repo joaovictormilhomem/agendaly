@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { useQuery, useMutation } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm, FormProvider, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -78,7 +78,6 @@ function diasFromApi(apiDias: DisponibilidadeFormValues["dias"]): Disponibilidad
 
 const INTERVALOS_OPTS = [
   { value: 0,  label: "Sem intervalo" },
-  { value: 10, label: "10 min" },
   { value: 15, label: "15 min" },
   { value: 30, label: "30 min" },
 ]
@@ -90,6 +89,7 @@ function formatData(iso: string) {
 
 export function DisponibilidadePage() {
   const { slug } = useParams<{ slug: string }>()
+  const queryClient = useQueryClient()
   const [bloqueioOpen, setBloqueioOpen] = useState(false)
   const [dataSelecionada, setDataSelecionada] = useState<Date | undefined>()
   const [motivo, setMotivo] = useState("")
@@ -129,7 +129,15 @@ export function DisponibilidadePage() {
       ...values,
       dias: values.dias.map(d => ({ ...d, dia: d.dia as 0 | 1 | 2 | 3 | 4 | 5 | 6 }))
     }),
-    onSuccess: () => toast.success("Disponibilidade salva!"),
+    onSuccess: (disponibilidadeSalva) => {
+      queryClient.setQueryData(["disponibilidade", slug], disponibilidadeSalva)
+      form.reset({
+        intervalo_atendimento_minutos: disponibilidadeSalva.intervalo_atendimento_minutos,
+        dias: diasFromApi(disponibilidadeSalva.dias as DisponibilidadeFormValues["dias"]),
+        bloqueios: disponibilidadeSalva.bloqueios,
+      })
+      toast.success("Disponibilidade salva!")
+    },
     onError: () => toast.error("Erro ao salvar. Tente novamente."),
   })
 
@@ -137,9 +145,14 @@ export function DisponibilidadePage() {
 
   const handleAdicionarBloqueio = () => {
     if (!dataSelecionada || !motivo.trim()) return
+    const data = format(dataSelecionada, "yyyy-MM-dd")
+    if (form.getValues("bloqueios").some((bloqueio) => bloqueio.data === data)) {
+      toast.error("Esta data já está bloqueada.")
+      return
+    }
     adicionarBloqueio({
       id: `b-${Date.now()}`,
-      data: format(dataSelecionada, "yyyy-MM-dd"),
+      data,
       motivo: motivo.trim(),
     })
     setDataSelecionada(undefined)

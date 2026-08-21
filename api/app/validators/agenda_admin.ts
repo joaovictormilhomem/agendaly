@@ -8,7 +8,7 @@ export const agendaManualValidator = vine.compile(
     cliente_email: vine.string().trim().email().optional(),
     servicoId: vineUuidLike(),
     data_hora_inicio: vine.string().trim().minLength(10),
-    notas_internas: vine.string().trim().minLength(1).maxLength(5000),
+    notas_internas: vine.string().trim().maxLength(5000).optional(),
   })
 )
 

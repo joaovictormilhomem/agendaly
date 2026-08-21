@@ -17,8 +17,16 @@ function serializeServico(s: Servico) {
   }
 }
 
-async function findUserAndAuthorize(slug: string, authJwt: HttpContext['authJwt'], response: HttpContext['response']) {
-  const user = await (User as any).query().where('slug', slug).first() as User | null
+function duracaoValida(duracao: number) {
+  return duracao >= 15 && duracao % 15 === 0
+}
+
+async function findUserAndAuthorize(
+  slug: string,
+  authJwt: HttpContext['authJwt'],
+  response: HttpContext['response']
+) {
+  const user = (await (User as any).query().where('slug', slug).first()) as User | null
   if (!user) {
     response.notFound({ message: 'Profissional não encontrada' })
     return null
@@ -35,9 +43,7 @@ export default class ServicosController {
     const user = await findUserAndAuthorize(params.slug, authJwt, response)
     if (!user) return
 
-    const servicos = await Servico.query()
-      .where('user_id', user.id)
-      .orderBy('created_at', 'asc')
+    const servicos = await Servico.query().where('user_id', user.id).orderBy('created_at', 'asc')
 
     return response.ok(servicos.map(serializeServico))
   }
@@ -47,6 +53,11 @@ export default class ServicosController {
     if (!user) return
 
     const body = await request.validateUsing(createServicoValidator)
+    if (!duracaoValida(body.duracao_minutos)) {
+      return response.unprocessableEntity({
+        message: 'A duração deve ser de no mínimo 15 minutos e avançar de 15 em 15 minutos',
+      })
+    }
 
     const servico = await Servico.create({
       id: crypto.randomUUID(),
@@ -68,14 +79,16 @@ export default class ServicosController {
     const user = await findUserAndAuthorize(params.slug, authJwt, response)
     if (!user) return
 
-    const servico = await Servico.query()
-      .where('id', params.id)
-      .where('user_id', user.id)
-      .first()
+    const servico = await Servico.query().where('id', params.id).where('user_id', user.id).first()
 
     if (!servico) return response.notFound({ message: 'Serviço não encontrado' })
 
     const body = await request.validateUsing(updateServicoValidator)
+    if (body.duracao_minutos !== undefined && !duracaoValida(body.duracao_minutos)) {
+      return response.unprocessableEntity({
+        message: 'A duração deve ser de no mínimo 15 minutos e avançar de 15 em 15 minutos',
+      })
+    }
 
     servico.merge({
       nome: body.nome ?? servico.nome,
@@ -97,10 +110,7 @@ export default class ServicosController {
     const user = await findUserAndAuthorize(params.slug, authJwt, response)
     if (!user) return
 
-    const servico = await Servico.query()
-      .where('id', params.id)
-      .where('user_id', user.id)
-      .first()
+    const servico = await Servico.query().where('id', params.id).where('user_id', user.id).first()
 
     if (!servico) return response.notFound({ message: 'Serviço não encontrado' })
 
@@ -112,7 +122,7 @@ export default class ServicosController {
   }
 
   async publicIndex({ params, response }: HttpContext) {
-    const user = await (User as any).query().where('slug', params.slug).first() as User | null
+    const user = (await (User as any).query().where('slug', params.slug).first()) as User | null
     if (!user) return response.notFound({ message: 'Profissional não encontrada' })
 
     const servicos = await Servico.query()

@@ -5,7 +5,10 @@ import Servico from '#models/servico'
 import User from '#models/user'
 import { serializeAgendamentoListItem } from '#helpers/agenda_serialization'
 import NotificacaoAgendamentoService from '#services/notificacao_agendamento_service'
-import SlotEngineService, { AGENDA_TIME_ZONE, invalidateSlotCacheForUser } from '#services/slot_engine_service'
+import SlotEngineService, {
+  AGENDA_TIME_ZONE,
+  invalidateSlotCacheForUser,
+} from '#services/slot_engine_service'
 import { agendaManualValidator, agendaStatusValidator } from '#validators/agenda_admin'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
@@ -63,8 +66,12 @@ export default class AdminAgendaController {
       return response.badRequest({ message: 'Informe data ou data_inicio e data_fim' })
     }
 
-    const rangeStart = DateTime.fromFormat(inicioStr, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE }).startOf('day')
-    const rangeEnd = DateTime.fromFormat(fimStr, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE }).endOf('day')
+    const rangeStart = DateTime.fromFormat(inicioStr, 'yyyy-LL-dd', {
+      zone: AGENDA_TIME_ZONE,
+    }).startOf('day')
+    const rangeEnd = DateTime.fromFormat(fimStr, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE }).endOf(
+      'day'
+    )
     const startUtc = rangeStart.toUTC()
     const endUtc = rangeEnd.toUTC()
 
@@ -123,9 +130,20 @@ export default class AdminAgendaController {
     if (!inicioUtc.isValid) {
       return response.badRequest({ message: 'data_hora_inicio inválido (use ISO 8601)' })
     }
-
     const disp = await Disponibilidade.query().where('user_id', user.id).first()
     const intervaloApos = disp?.intervaloAtendimentoMinutos ?? 30
+    const intervaloGrid = Math.max(15, intervaloApos)
+    const inicioLocal = inicioUtc.setZone(AGENDA_TIME_ZONE)
+    const inicioDoDiaMinutos = inicioLocal.hour * 60 + inicioLocal.minute
+    if (
+      inicioLocal.second !== 0 ||
+      inicioLocal.millisecond !== 0 ||
+      inicioDoDiaMinutos % intervaloGrid !== 0
+    ) {
+      return response.badRequest({
+        message: `O horário deve respeitar a grade de ${intervaloGrid} minutos`,
+      })
+    }
     const fimUtc = inicioUtc.plus({ minutes: servico.duracaoMinutos })
 
     const conflito = await slotEngine.conflitaManualComConfirmado({
@@ -149,7 +167,7 @@ export default class AdminAgendaController {
       dataHoraFim: fimUtc,
       status: 'CONFIRMADO',
       statusConfirmacao: 'manual_admin',
-      notasInternas: body.notas_internas,
+      notasInternas: body.notas_internas ?? null,
     })
 
     await ag.load('servico')

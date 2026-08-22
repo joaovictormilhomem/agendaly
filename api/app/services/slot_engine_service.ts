@@ -2,8 +2,8 @@ import { DEFAULT_DIAS } from '#constants/disponibilidade_defaults'
 import Agendamento from '#models/agendamento'
 import BloqueioAgenda from '#models/bloqueio_agenda'
 import Disponibilidade from '#models/disponibilidade'
-import Servico from '#models/servico'
-import User from '#models/user'
+import type Servico from '#models/servico'
+import type User from '#models/user'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
 
@@ -11,7 +11,11 @@ import crypto from 'node:crypto'
 export const AGENDA_TIME_ZONE = 'America/Sao_Paulo'
 
 const SLOT_CACHE_TTL_MS = 120_000
-const slotCache = new Map<string, { expires: number; payload: { hora: string; disponivel: boolean }[] }>()
+const MINIMUM_SLOT_GRID_MINUTES = 15
+const slotCache = new Map<
+  string,
+  { expires: number; payload: { hora: string; disponivel: boolean }[] }
+>()
 
 export function invalidateSlotCacheForUser(userId: string) {
   const prefix = `${userId}:`
@@ -77,7 +81,9 @@ export default class SlotEngineService {
       return hit.payload
     }
 
-    const dayStart = DateTime.fromFormat(data, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE }).startOf('day')
+    const dayStart = DateTime.fromFormat(data, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE }).startOf(
+      'day'
+    )
     const dayEnd = dayStart.endOf('day')
 
     const todayStart = now.startOf('day')
@@ -96,14 +102,18 @@ export default class SlotEngineService {
         dias: DEFAULT_DIAS,
       }))
 
-    const intervaloGrid = disp.intervaloAtendimentoMinutos
     const intervaloApos = disp.intervaloAtendimentoMinutos
+    const intervaloGrid = Math.max(MINIMUM_SLOT_GRID_MINUTES, intervaloApos)
     const duracao = servico.duracaoMinutos
 
     const agendamentos = await Agendamento.query()
       .where('user_id', user.id)
       .where((q) => {
-        q.where('data_hora_inicio', '<', dayEnd.toUTC().toISO()!).where('data_hora_fim', '>', dayStart.toUTC().toISO()!)
+        q.where('data_hora_inicio', '<', dayEnd.toUTC().toISO()!).where(
+          'data_hora_fim',
+          '>',
+          dayStart.toUTC().toISO()!
+        )
       })
       .whereIn('status', ['CONFIRMADO', 'PENDENTE'])
 
@@ -137,7 +147,7 @@ export default class SlotEngineService {
       const { h: h1, m: m1 } = parseHhMm(intervalo.hora_fim)
       const startMin = h0 * 60 + m0
       const endMin = h1 * 60 + m1
-      let m = startMin
+      let m = Math.ceil(startMin / intervaloGrid) * intervaloGrid
       while (m < endMin) {
         const start = atMinutesOnDay(dayStart, m)
         const fimComBuffer = start.plus({ minutes: duracao + intervaloApos })
@@ -150,9 +160,7 @@ export default class SlotEngineService {
     }
 
     const bloqueadores =
-      mode === 'manual'
-        ? ativos.filter((a) => a.status === 'CONFIRMADO')
-        : ativos
+      mode === 'manual' ? ativos.filter((a) => a.status === 'CONFIRMADO') : ativos
 
     const result: { hora: string; disponivel: boolean }[] = []
 
@@ -161,7 +169,7 @@ export default class SlotEngineService {
         continue
       }
       const c0 = start.toUTC()
-      const c1 = start.plus({ minutes: duracao }).toUTC()
+      const c1 = start.plus({ minutes: duracao + intervaloApos }).toUTC()
       let livre = true
       for (const a of bloqueadores) {
         const a0 = a.dataHoraInicio
@@ -193,7 +201,7 @@ export default class SlotEngineService {
   }): boolean {
     const { servico, inicioUtc, bloqueadores, intervaloAposMinutos } = params
     const c0 = inicioUtc
-    const c1 = inicioUtc.plus({ minutes: servico.duracaoMinutos })
+    const c1 = inicioUtc.plus({ minutes: servico.duracaoMinutos + intervaloAposMinutos })
     const now = DateTime.utc()
     for (const a of bloqueadores) {
       if (a.status === 'CANCELADO') continue
@@ -256,10 +264,15 @@ export default class SlotEngineService {
     const { user, servico, inicioUtc } = params
     const z = inicioUtc.setZone(AGENDA_TIME_ZONE)
     const data = z.toFormat('yyyy-LL-dd')
-    const dayStart = DateTime.fromFormat(data, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE }).startOf('day')
+    const dayStart = DateTime.fromFormat(data, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE }).startOf(
+      'day'
+    )
     const dayEnd = dayStart.endOf('day')
 
-    const bloqueio = await BloqueioAgenda.query().where('user_id', user.id).where('data', data).first()
+    const bloqueio = await BloqueioAgenda.query()
+      .where('user_id', user.id)
+      .where('data', data)
+      .first()
     if (bloqueio) return false
 
     const disp =
@@ -272,6 +285,11 @@ export default class SlotEngineService {
       }))
 
     const intervaloApos = disp.intervaloAtendimentoMinutos
+    const intervaloGrid = Math.max(MINIMUM_SLOT_GRID_MINUTES, intervaloApos)
+    const inicioDoDiaMinutos = z.hour * 60 + z.minute
+    if (z.second !== 0 || z.millisecond !== 0 || inicioDoDiaMinutos % intervaloGrid !== 0) {
+      return false
+    }
     const diaCfg = disp.dias.find((d) => d.dia === jsWeekdayFromLuxon(dayStart))
     if (!diaCfg?.ativo) return false
 
@@ -294,7 +312,11 @@ export default class SlotEngineService {
     const agendamentos = await Agendamento.query()
       .where('user_id', user.id)
       .where((q) => {
-        q.where('data_hora_inicio', '<', dayEnd.toUTC().toISO()!).where('data_hora_fim', '>', dayStart.toUTC().toISO()!)
+        q.where('data_hora_inicio', '<', dayEnd.toUTC().toISO()!).where(
+          'data_hora_fim',
+          '>',
+          dayStart.toUTC().toISO()!
+        )
       })
       .whereIn('status', ['CONFIRMADO', 'PENDENTE'])
 
@@ -318,10 +340,10 @@ export default class SlotEngineService {
       .where('user_id', userId)
       .where('status', 'CONFIRMADO')
       .where('data_hora_inicio', '<', fimUtc.plus({ minutes: intervaloAposMinutos }).toISO()!)
-      .where('data_hora_fim', '>', inicioUtc.toISO()!)
+      .where('data_hora_fim', '>', inicioUtc.minus({ minutes: intervaloAposMinutos }).toISO()!)
 
     const c0 = inicioUtc
-    const c1 = fimUtc
+    const c1 = fimUtc.plus({ minutes: intervaloAposMinutos })
     for (const a of list) {
       const a0 = a.dataHoraInicio
       const a1 = agendamentoInflatedEnd(a, intervaloAposMinutos)

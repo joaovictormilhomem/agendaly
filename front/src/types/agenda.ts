@@ -32,7 +32,7 @@ export interface AgendamentoManualCreate {
   cliente_whatsapp: string
   servicoId: string
   data_hora_inicio: string
-  notas_internas: string
+  notas_internas?: string
 }
 
 export interface AgendaStatusPatch {

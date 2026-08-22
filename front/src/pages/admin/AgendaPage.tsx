@@ -3,9 +3,9 @@ import { useParams } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
 import { toast } from "sonner"
-import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns"
+import { addDays, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Plus } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card"
@@ -232,14 +232,18 @@ export function AgendaPage() {
           <Calendar
             mode="single"
             selected={selectedDate}
-            onSelect={(d) => d && setSelectedDate(d)}
+            onSelect={(d) => {
+              if (!d) return
+              setSelectedDate(d)
+              setViewMode("dia")
+            }}
             locale={ptBR}
             className="p-3 bg-white"
           />
         </Card>
 
         <Card className="border border-border min-h-[400px] pb-0 gap-0">
-          <div className="flex items-center justify-between px-5 pb-4 border-b border-border">
+          <div className="flex items-center justify-between gap-3 px-5 pb-4 border-b border-border">
             <div>
               <p className="text-base font-semibold text-foreground">
                 {headerSubtitle ??
@@ -253,10 +257,45 @@ export function AgendaPage() {
                 </p>
               )}
             </div>
-            <Button size="sm" className="rounded-full gap-1.5" onClick={() => setNovoOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Novo
-            </Button>
+            <div className="flex items-center gap-1">
+              {viewMode === "dia" && (
+                <>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8 rounded-full"
+                    aria-label="Dia anterior"
+                    onClick={() => setSelectedDate((date) => addDays(date, -1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-8 rounded-full"
+                    onClick={() => setSelectedDate(new Date())}
+                  >
+                    Hoje
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8 rounded-full"
+                    aria-label="Próximo dia"
+                    onClick={() => setSelectedDate((date) => addDays(date, 1))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+              <Button size="sm" className="rounded-full gap-1.5 ml-1" onClick={() => setNovoOpen(true)}>
+                <Plus className="h-4 w-4" />
+                Novo
+              </Button>
+            </div>
           </div>
 
           <div className="px-5">

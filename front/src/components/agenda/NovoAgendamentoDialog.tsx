@@ -29,7 +29,7 @@ const schema = z.object({
   cliente_email: z.union([z.literal(""), z.string().email("E-mail inválido")]),
   cliente_whatsapp: z.string().min(1, "Telefone é obrigatório"),
   servicoId: z.string().min(1, "Selecione um serviço"),
-  notas_internas: z.string().min(1, "Notas internas são obrigatórias"),
+  notas_internas: z.string().max(5000, "Máximo de 5000 caracteres"),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -87,7 +87,7 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
         cliente_whatsapp: values.cliente_whatsapp.replace(/\D/g, "").slice(0, 20),
         servicoId: values.servicoId,
         data_hora_inicio: combineDateAndTimeToIso(selectedDate, selectedSlot),
-        notas_internas: values.notas_internas.trim(),
+        notas_internas: values.notas_internas.trim() || undefined,
       })
     },
     onSuccess: () => {
@@ -260,7 +260,9 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
               name="notas_internas"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="data-[error=true]:text-foreground">Notas internas</FormLabel>
+                  <FormLabel className="data-[error=true]:text-foreground">
+                    Notas internas <span className="font-normal text-muted-foreground">(opcional)</span>
+                  </FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Motivo do agendamento manual, observações para a equipe…"

@@ -7,12 +7,60 @@ import hash from '@adonisjs/core/services/hash'
 import crypto from 'node:crypto'
 
 const DEMO_SERVICOS = [
-  { id: 'a0000000-0000-0000-0000-000000000001', nome: 'Alongamento em Gel', emoji: '💅', descricao: 'Alongamento completo com gel UV, inclui nail art simples.', duracao_minutos: 90, preco: 120, ativo: true },
-  { id: 'a0000000-0000-0000-0000-000000000002', nome: 'Manutenção', emoji: '✨', descricao: 'Manutenção do alongamento existente com retoque de gel.', duracao_minutos: 45, preco: 60, ativo: true },
-  { id: 'a0000000-0000-0000-0000-000000000003', nome: 'Unhas em Fibra', emoji: '💎', descricao: 'Alongamento em fibra de vidro com acabamento natural e resistente.', duracao_minutos: 90, preco: 100, ativo: true },
-  { id: 'a0000000-0000-0000-0000-000000000004', nome: 'Esmaltação Comum', emoji: '🌸', descricao: 'Esmaltação simples com base, esmalte e top coat.', duracao_minutos: 30, preco: 30, ativo: true },
-  { id: 'a0000000-0000-0000-0000-000000000005', nome: 'Nail Art', emoji: '🎨', descricao: 'Arte personalizada nas unhas, por unidade ou kit completo.', duracao_minutos: 40, preco: 50, ativo: true },
-  { id: 'a0000000-0000-0000-0000-000000000006', nome: 'Remoção', emoji: '🧼', descricao: 'Remoção segura de gel ou acrigel sem danificar a unha natural.', duracao_minutos: 30, preco: 40, ativo: true },
+  {
+    id: 'a0000000-0000-0000-0000-000000000001',
+    nome: 'Alongamento em Gel',
+    emoji: '💅',
+    descricao: 'Alongamento completo com gel UV, inclui nail art simples.',
+    duracao_minutos: 90,
+    preco: 120,
+    ativo: true,
+  },
+  {
+    id: 'a0000000-0000-0000-0000-000000000002',
+    nome: 'Manutenção',
+    emoji: '✨',
+    descricao: 'Manutenção do alongamento existente com retoque de gel.',
+    duracao_minutos: 45,
+    preco: 60,
+    ativo: true,
+  },
+  {
+    id: 'a0000000-0000-0000-0000-000000000003',
+    nome: 'Unhas em Fibra',
+    emoji: '💎',
+    descricao: 'Alongamento em fibra de vidro com acabamento natural e resistente.',
+    duracao_minutos: 90,
+    preco: 100,
+    ativo: true,
+  },
+  {
+    id: 'a0000000-0000-0000-0000-000000000004',
+    nome: 'Esmaltação Comum',
+    emoji: '🌸',
+    descricao: 'Esmaltação simples com base, esmalte e top coat.',
+    duracao_minutos: 30,
+    preco: 30,
+    ativo: true,
+  },
+  {
+    id: 'a0000000-0000-0000-0000-000000000005',
+    nome: 'Nail Art',
+    emoji: '🎨',
+    descricao: 'Arte personalizada nas unhas, por unidade ou kit completo.',
+    duracao_minutos: 45,
+    preco: 50,
+    ativo: true,
+  },
+  {
+    id: 'a0000000-0000-0000-0000-000000000006',
+    nome: 'Remoção',
+    emoji: '🧼',
+    descricao: 'Remoção segura de gel ou acrigel sem danificar a unha natural.',
+    duracao_minutos: 30,
+    preco: 40,
+    ativo: true,
+  },
 ]
 
 export default class extends BaseSeeder {
@@ -64,11 +112,32 @@ export default class extends BaseSeeder {
         userId: profDemo.id,
         intervaloAtendimentoMinutos: 30,
         dias: [
-          { dia: 0, ativo: true,  intervalos: [{ hora_inicio: '09:00', hora_fim: '12:00' }, { hora_inicio: '13:00', hora_fim: '18:00' }] },
-          { dia: 1, ativo: true,  intervalos: [{ hora_inicio: '09:00', hora_fim: '12:00' }, { hora_inicio: '13:00', hora_fim: '18:00' }] },
-          { dia: 2, ativo: true,  intervalos: [{ hora_inicio: '09:00', hora_fim: '12:00' }, { hora_inicio: '13:00', hora_fim: '18:00' }] },
-          { dia: 3, ativo: true,  intervalos: [{ hora_inicio: '09:00', hora_fim: '12:00' }] },
-          { dia: 4, ativo: true,  intervalos: [{ hora_inicio: '09:00', hora_fim: '12:00' }] },
+          {
+            dia: 0,
+            ativo: true,
+            intervalos: [
+              { hora_inicio: '09:00', hora_fim: '12:00' },
+              { hora_inicio: '13:00', hora_fim: '18:00' },
+            ],
+          },
+          {
+            dia: 1,
+            ativo: true,
+            intervalos: [
+              { hora_inicio: '09:00', hora_fim: '12:00' },
+              { hora_inicio: '13:00', hora_fim: '18:00' },
+            ],
+          },
+          {
+            dia: 2,
+            ativo: true,
+            intervalos: [
+              { hora_inicio: '09:00', hora_fim: '12:00' },
+              { hora_inicio: '13:00', hora_fim: '18:00' },
+            ],
+          },
+          { dia: 3, ativo: true, intervalos: [{ hora_inicio: '09:00', hora_fim: '12:00' }] },
+          { dia: 4, ativo: true, intervalos: [{ hora_inicio: '09:00', hora_fim: '12:00' }] },
           { dia: 5, ativo: false, intervalos: [] },
           { dia: 6, ativo: false, intervalos: [] },
         ],

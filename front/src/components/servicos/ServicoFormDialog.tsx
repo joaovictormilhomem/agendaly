@@ -15,7 +15,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { EmojiPicker } from "@/components/servicos/EmojiPicker"
 import type { Servico, ServicoCreate } from "@/types/servico"
 
@@ -23,7 +22,11 @@ const servicoSchema = z.object({
   emoji: z.string().min(1, "Obrigatório").max(4, "Muito longo"),
   nome: z.string().min(1, "Nome é obrigatório"),
   descricao: z.string().optional().default(""),
-  duracao_minutos: z.coerce.number().int().positive(),
+  duracao_minutos: z.coerce
+    .number()
+    .int()
+    .min(15, "A duração mínima é de 15 minutos")
+    .refine((value) => value % 15 === 0, "Use intervalos de 15 minutos"),
   preco: z.coerce.number().positive("Informe um valor válido"),
   ativo: z.boolean().default(true),
 })
@@ -37,14 +40,6 @@ interface Props {
   onSubmit: (data: ServicoCreate) => void
   isPending?: boolean
 }
-
-const DURACOES = [
-  { value: 30, label: "30 min" },
-  { value: 45, label: "45 min" },
-  { value: 60, label: "1 hora" },
-  { value: 90, label: "1h 30min" },
-  { value: 120, label: "2 horas" },
-]
 
 export function ServicoFormDialog({ open, onOpenChange, servico, onSubmit, isPending }: Props) {
   const [isEdit, setIsEdit] = useState(!!servico)
@@ -150,24 +145,18 @@ export function ServicoFormDialog({ open, onOpenChange, servico, onSubmit, isPen
                 name="duracao_minutos"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Duração</FormLabel>
-                    <Select
-                      value={String(field.value)}
-                      onValueChange={(v) => field.onChange(Number(v))}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {DURACOES.map((d) => (
-                          <SelectItem key={d.value} value={String(d.value)} className="bg-white">
-                            {d.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Duração (minutos)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={15}
+                        step={15}
+                        inputMode="numeric"
+                        placeholder="Ex: 75"
+                        {...field}
+                        className="bg-white"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

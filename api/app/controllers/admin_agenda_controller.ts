@@ -1,9 +1,11 @@
 import Agendamento from '#models/agendamento'
 import AgendamentoCancelamento from '#models/agendamento_cancelamento'
+import AgendamentoIncremento from '#models/agendamento_incremento'
 import Disponibilidade from '#models/disponibilidade'
 import Servico from '#models/servico'
 import User from '#models/user'
 import { serializeAgendamentoListItem } from '#helpers/agenda_serialization'
+import { resolverTotaisServico } from '#helpers/servico_incrementos'
 import NotificacaoAgendamentoService from '#services/notificacao_agendamento_service'
 import SlotEngineService, {
   AGENDA_TIME_ZONE,
@@ -80,6 +82,7 @@ export default class AdminAgendaController {
       .where('data_hora_inicio', '<', endUtc.toISO()!)
       .where('data_hora_fim', '>', startUtc.toISO()!)
       .preload('servico')
+      .preload('incrementos')
       .orderBy('data_hora_inicio', 'asc')
 
     return response.ok({
@@ -99,6 +102,7 @@ export default class AdminAgendaController {
       .where('id', params.id)
       .where('user_id', user.id)
       .preload('servico')
+      .preload('incrementos')
       .first()
 
     if (!ag) return response.notFound({ message: 'Agendamento não encontrado' })
@@ -122,9 +126,20 @@ export default class AdminAgendaController {
       .where('id', body.servicoId)
       .where('user_id', user.id)
       .where('ativo', true)
+      .preload('incrementos')
       .first()
 
     if (!servico) return response.notFound({ message: 'Serviço não encontrado' })
+
+    const resolved = resolverTotaisServico(
+      servico,
+      servico.incrementos ?? [],
+      body.incremento_ids
+    )
+    if (!resolved.ok) {
+      return response.unprocessableEntity({ message: resolved.message })
+    }
+    const totais = resolved.totais
 
     const inicioUtc = DateTime.fromISO(body.data_hora_inicio, { setZone: true })
     if (!inicioUtc.isValid) {
@@ -144,7 +159,7 @@ export default class AdminAgendaController {
         message: `O horário deve respeitar a grade de ${intervaloGrid} minutos`,
       })
     }
-    const fimUtc = inicioUtc.plus({ minutes: servico.duracaoMinutos })
+    const fimUtc = inicioUtc.plus({ minutes: totais.duracao_minutos })
 
     const conflito = await slotEngine.conflitaManualComConfirmado({
       userId: user.id,
@@ -170,7 +185,19 @@ export default class AdminAgendaController {
       notasInternas: body.notas_internas ?? null,
     })
 
+    for (const inc of totais.incrementos) {
+      await AgendamentoIncremento.create({
+        id: crypto.randomUUID(),
+        agendamentoId: ag.id,
+        servicoIncrementoId: inc.id,
+        nome: inc.nome,
+        duracaoMinutos: inc.duracao_minutos,
+        preco: inc.preco,
+      })
+    }
+
     await ag.load('servico')
+    await ag.load('incrementos')
     invalidateSlotCacheForUser(user.id)
     await notificacao.agendamentoCriado(ag, 'manual_admin')
 
@@ -204,6 +231,7 @@ export default class AdminAgendaController {
       })
       invalidateSlotCacheForUser(user.id)
       await ag.load('servico')
+      await ag.load('incrementos')
       await notificacao.agendamentoCancelado(ag, body.motivo ?? null)
       return response.ok(serializeAgendamentoListItem(ag))
     }
@@ -214,6 +242,7 @@ export default class AdminAgendaController {
       }
       if (ag.status === 'CONFIRMADO') {
         await ag.load('servico')
+        await ag.load('incrementos')
         return response.ok(serializeAgendamentoListItem(ag))
       }
       ag.status = 'CONFIRMADO'
@@ -221,6 +250,7 @@ export default class AdminAgendaController {
       await ag.save()
       invalidateSlotCacheForUser(user.id)
       await ag.load('servico')
+      await ag.load('incrementos')
       await notificacao.agendamentoConfirmadoPeloAdmin(ag)
       return response.ok(serializeAgendamentoListItem(ag))
     }

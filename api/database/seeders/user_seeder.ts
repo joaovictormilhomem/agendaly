@@ -1,10 +1,30 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import User from '#models/user'
 import Servico from '#models/servico'
+import ServicoIncremento from '#models/servico_incremento'
 import Configuracao from '#models/configuracao'
 import Disponibilidade from '#models/disponibilidade'
 import hash from '@adonisjs/core/services/hash'
 import crypto from 'node:crypto'
+
+const DEMO_INCREMENTOS_ESMALTACAO = [
+  {
+    id: 'b0000000-0000-0000-0000-000000000001',
+    nome: 'Mãos',
+    duracao_minutos: 30,
+    preco: 30,
+    obrigatorio: false,
+    ordem: 0,
+  },
+  {
+    id: 'b0000000-0000-0000-0000-000000000002',
+    nome: 'Pés',
+    duracao_minutos: 30,
+    preco: 35,
+    obrigatorio: false,
+    ordem: 1,
+  },
+]
 
 const DEMO_SERVICOS = [
   {
@@ -38,7 +58,7 @@ const DEMO_SERVICOS = [
     id: 'a0000000-0000-0000-0000-000000000004',
     nome: 'Esmaltação Comum',
     emoji: '🌸',
-    descricao: 'Esmaltação simples com base, esmalte e top coat.',
+    descricao: 'Esmaltação simples com base, esmalte e top coat. Escolha mãos, pés ou ambos.',
     duracao_minutos: 30,
     preco: 30,
     ativo: true,
@@ -101,6 +121,22 @@ export default class extends BaseSeeder {
           duracaoMinutos: s.duracao_minutos,
           preco: s.preco,
           ativo: s.ativo,
+        }
+      )
+    }
+
+    const esmaltacaoId = 'a0000000-0000-0000-0000-000000000004'
+    for (const inc of DEMO_INCREMENTOS_ESMALTACAO) {
+      await ServicoIncremento.firstOrCreate(
+        { id: inc.id },
+        {
+          id: inc.id,
+          servicoId: esmaltacaoId,
+          nome: inc.nome,
+          duracaoMinutos: inc.duracao_minutos,
+          preco: inc.preco,
+          obrigatorio: inc.obrigatorio,
+          ordem: inc.ordem,
         }
       )
     }

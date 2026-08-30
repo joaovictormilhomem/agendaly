@@ -9,6 +9,7 @@ export const servicosMock: Servico[] = [
     duracao_minutos: 90,
     preco: 120,
     ativo: true,
+    incrementos: [],
   },
   {
     id: "svc-002",
@@ -18,6 +19,7 @@ export const servicosMock: Servico[] = [
     duracao_minutos: 45,
     preco: 60,
     ativo: true,
+    incrementos: [],
   },
   {
     id: "svc-003",
@@ -27,15 +29,35 @@ export const servicosMock: Servico[] = [
     duracao_minutos: 90,
     preco: 100,
     ativo: true,
+    incrementos: [],
   },
   {
     id: "svc-004",
     nome: "Esmaltação Comum",
     emoji: "🌸",
-    descricao: "Esmaltação simples com base, esmalte e top coat.",
+    descricao: "Esmaltação simples com base, esmalte e top coat. Escolha mãos, pés ou ambos.",
     duracao_minutos: 30,
     preco: 30,
     ativo: true,
+    tem_incrementos: true,
+    incrementos: [
+      {
+        id: "inc-mao",
+        nome: "Mãos",
+        duracao_minutos: 30,
+        preco: 30,
+        obrigatorio: false,
+        ordem: 0,
+      },
+      {
+        id: "inc-pe",
+        nome: "Pés",
+        duracao_minutos: 30,
+        preco: 35,
+        obrigatorio: false,
+        ordem: 1,
+      },
+    ],
   },
   {
     id: "svc-005",
@@ -45,6 +67,7 @@ export const servicosMock: Servico[] = [
     duracao_minutos: 45,
     preco: 50,
     ativo: true,
+    incrementos: [],
   },
   {
     id: "svc-006",
@@ -54,5 +77,6 @@ export const servicosMock: Servico[] = [
     duracao_minutos: 30,
     preco: 40,
     ativo: true,
+    incrementos: [],
   },
 ]

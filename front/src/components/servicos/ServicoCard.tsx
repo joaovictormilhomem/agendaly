@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
-import type { Servico } from "@/types/servico"
+import { formatPrecoServico, type Servico } from "@/types/servico"
 
 interface Props {
   servico: Servico
@@ -27,11 +27,9 @@ function formatDuracao(min: number) {
   return m > 0 ? `${h}h ${m}min` : `${h}h`
 }
 
-function formatPreco(preco: number) {
-  return preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-}
-
 export function ServicoCard({ servico, onEdit, onDelete }: Props) {
+  const incrementos = servico.incrementos ?? []
+
   return (
     <div className="flex items-center gap-4 rounded-xl border border-border bg-card px-5 py-4">
       <span className="text-2xl shrink-0 leading-none">{servico.emoji}</span>
@@ -39,10 +37,10 @@ export function ServicoCard({ servico, onEdit, onDelete }: Props) {
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-foreground text-sm">{servico.nome}</p>
         <div className="flex items-center gap-2 mt-1 flex-wrap">
-          <span className="text-sm font-semibold text-primary">{formatPreco(servico.preco)}</span>
+          <span className="text-sm font-semibold text-primary">{formatPrecoServico(servico)}</span>
           <span className="inline-flex items-center gap-1 text-xs bg-muted text-muted-foreground rounded-full px-2 py-0.5">
             <Clock className="h-3 w-3" />
-            {formatDuracao(servico.duracao_minutos)}
+            {incrementos.length > 0 ? `a partir de ${formatDuracao(servico.duracao_minutos)}` : formatDuracao(servico.duracao_minutos)}
           </span>
           <span
             className={cn(
@@ -55,6 +53,11 @@ export function ServicoCard({ servico, onEdit, onDelete }: Props) {
             {servico.ativo ? "Ativo" : "Inativo"}
           </span>
         </div>
+        {incrementos.length > 0 && (
+          <p className="text-xs text-muted-foreground mt-1.5 truncate">
+            {incrementos.map((i) => `${i.nome}${i.obrigatorio ? " (obrig.)" : ""}`).join(" · ")}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-2 shrink-0">

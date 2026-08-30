@@ -72,7 +72,12 @@ function AgendamentoCard({ item, showDate, onDetalhes, onCancelar }: Agendamento
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
             <p className="text-sm font-semibold text-foreground">{item.cliente_nome}</p>
-            <p className="text-xs text-muted-foreground">{item.servico.nome}</p>
+            <p className="text-xs text-muted-foreground">
+              {item.servico.nome}
+              {(item.servico.incrementos?.length ?? 0) > 0
+                ? ` (${item.servico.incrementos!.map((i) => i.nome).join(" + ")})`
+                : ""}
+            </p>
           </div>
           <StatusChip status={item.status} />
         </div>

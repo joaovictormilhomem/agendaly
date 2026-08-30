@@ -13,6 +13,7 @@ import type { Servico } from "@/types/servico"
 
 export interface BookingData {
   service: Servico | null
+  incrementoIds: string[]
   date: Date | null
   time: string | null
   clientName: string
@@ -22,6 +23,7 @@ export interface BookingData {
 
 const INITIAL_STATE: BookingData = {
   service: null,
+  incrementoIds: [],
   date: null,
   time: null,
   clientName: "",
@@ -48,8 +50,14 @@ export function AgendarPage() {
     setCurrentStep(step)
   }
 
-  const handleServiceSelect = (service: Servico) => {
-    setBookingData((prev) => ({ ...prev, service }))
+  const handleServiceSelect = (service: Servico, incrementoIds: string[]) => {
+    setBookingData((prev) => ({
+      ...prev,
+      service,
+      incrementoIds,
+      date: null,
+      time: null,
+    }))
     setCurrentStep(2)
   }
 
@@ -82,6 +90,8 @@ export function AgendarPage() {
         cliente_whatsapp: bookingData.clientWhatsapp.replace(/\D/g, "").slice(0, 20),
         cliente_email: bookingData.clientEmail.trim() || undefined,
         servicoId: bookingData.service.id,
+        incremento_ids:
+          bookingData.incrementoIds.length > 0 ? bookingData.incrementoIds : undefined,
         slot_datetime,
       })
 
@@ -115,6 +125,7 @@ export function AgendarPage() {
             <DateTimeStep
               slug={slug}
               service={bookingData.service}
+              incrementoIds={bookingData.incrementoIds}
               onSelect={handleDateTimeSelect}
             />
           )}

@@ -11,11 +11,18 @@ import type { Servico } from "@/types/servico"
 interface DateTimeStepProps {
   slug: string
   service: Servico
+  incrementoIds?: string[]
   bookedDates?: Date[]
   onSelect: (date: Date, time: string) => void
 }
 
-export function DateTimeStep({ slug, service, bookedDates = [], onSelect }: DateTimeStepProps) {
+export function DateTimeStep({
+  slug,
+  service,
+  incrementoIds = [],
+  bookedDates = [],
+  onSelect,
+}: DateTimeStepProps) {
   const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(tomorrow)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
@@ -26,7 +33,7 @@ export function DateTimeStep({ slug, service, bookedDates = [], onSelect }: Date
     if (!selectedDate) return
     setIsLoadingSlots(true)
     setSelectedTime(null)
-    getSlotsDisponiveis(slug, selectedDate, service.id)
+    getSlotsDisponiveis(slug, selectedDate, service.id, incrementoIds)
       .then((rows) => setSlots(rows.filter((r) => r.disponivel).map((r) => r.hora)))
       .catch((err: unknown) => {
         console.error(err)
@@ -34,7 +41,7 @@ export function DateTimeStep({ slug, service, bookedDates = [], onSelect }: Date
         toast.error("Não foi possível carregar os horários. Verifique se o serviço está ativo e tente outra data.")
       })
       .finally(() => setIsLoadingSlots(false))
-  }, [slug, selectedDate, service.id])
+  }, [slug, selectedDate, service.id, incrementoIds])
 
   const isDateDisabled = (date: Date) => {
     const today = new Date()

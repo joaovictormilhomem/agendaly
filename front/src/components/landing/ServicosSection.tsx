@@ -1,14 +1,10 @@
 import { Link } from "react-router-dom"
 import { Clock, CalendarDays } from "lucide-react"
-import type { Servico } from "@/types/servico"
+import { formatPrecoServico, type Servico } from "@/types/servico"
 
 interface Props {
   servicos: Servico[]
   slug: string
-}
-
-function formatPreco(preco: number) {
-  return `R$ ${preco.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`
 }
 
 function formatDuracao(minutos: number) {
@@ -39,13 +35,20 @@ export function ServicosSection({ servicos, slug }: Props) {
             >
               <span className="text-3xl leading-none block">{servico.emoji}</span>
               <p className="text-sm font-semibold text-foreground">{servico.nome}</p>
+              {(servico.incrementos?.length ?? 0) > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {servico.incrementos.map((i) => i.nome).join(" · ")}
+                </p>
+              )}
               <div className="flex items-center justify-between pt-1">
                 <span className="text-sm font-bold" style={{ color: "var(--color-primary)" }}>
-                  {formatPreco(servico.preco)}
+                  {formatPrecoServico(servico)}
                 </span>
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3.5 w-3.5" />
-                  {formatDuracao(servico.duracao_minutos)}
+                  {(servico.incrementos?.length ?? 0) > 0
+                    ? `a partir de ${formatDuracao(servico.duracao_minutos)}`
+                    : formatDuracao(servico.duracao_minutos)}
                 </span>
               </div>
             </div>

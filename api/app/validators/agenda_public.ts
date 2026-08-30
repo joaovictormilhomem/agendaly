@@ -7,6 +7,7 @@ export const publicAgendarValidator = vine.compile(
     cliente_whatsapp: vine.string().trim().minLength(8).maxLength(20),
     cliente_email: vine.string().trim().email().optional(),
     servicoId: vineUuidLike(),
+    incremento_ids: vine.array(vineUuidLike()).optional(),
     slot_datetime: vine.string().trim().minLength(10),
   })
 )

@@ -23,6 +23,7 @@ import { getServicos } from "@/api/admin/servicos"
 import { createAgendamentoManual, getAdminSlots } from "@/api/admin/agenda"
 import { combineDateAndTimeToIso } from "@/lib/datetime"
 import { cn } from "@/lib/utils"
+import { idsObrigatorios, totaisServico } from "@/types/servico"
 
 const schema = z.object({
   cliente_nome: z.string().min(1, "Nome é obrigatório"),
@@ -52,6 +53,7 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
   const qc = useQueryClient()
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate ?? new Date())
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
+  const [incrementoIds, setIncrementoIds] = useState<string[]>([])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -72,10 +74,24 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
     enabled: open,
   })
 
+  const servicoSelecionado = servicos.find((s) => s.id === servicoId)
+  const temIncrementos = (servicoSelecionado?.incrementos?.length ?? 0) > 0
+  const incrementosOk =
+    !temIncrementos ||
+    (servicoSelecionado
+      ? totaisServico(servicoSelecionado, incrementoIds).incrementos.length > 0
+      : false)
+
   const { data: slots = [] } = useQuery({
-    queryKey: ["admin-slots", slug, format(selectedDate, "yyyy-MM-dd"), servicoId],
-    queryFn: () => getAdminSlots(slug, selectedDate, servicoId),
-    enabled: open && !!servicoId,
+    queryKey: [
+      "admin-slots",
+      slug,
+      format(selectedDate, "yyyy-MM-dd"),
+      servicoId,
+      [...incrementoIds].sort().join(","),
+    ],
+    queryFn: () => getAdminSlots(slug, selectedDate, servicoId, incrementoIds),
+    enabled: open && !!servicoId && incrementosOk,
   })
 
   const { mutate, isPending } = useMutation({
@@ -86,6 +102,7 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
         cliente_email: values.cliente_email.trim() || undefined,
         cliente_whatsapp: values.cliente_whatsapp.replace(/\D/g, "").slice(0, 20),
         servicoId: values.servicoId,
+        incremento_ids: incrementoIds.length > 0 ? incrementoIds : undefined,
         data_hora_inicio: combineDateAndTimeToIso(selectedDate, selectedSlot),
         notas_internas: values.notas_internas.trim() || undefined,
       })
@@ -108,14 +125,27 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
       })
       setSelectedDate(initialDate ?? new Date())
       setSelectedSlot(null)
+      setIncrementoIds([])
     }
   }, [open, initialDate, form])
 
   useEffect(() => {
     setSelectedSlot(null)
-  }, [selectedDate, servicoId])
+  }, [selectedDate, servicoId, incrementoIds])
+
+  useEffect(() => {
+    if (!servicoSelecionado) {
+      setIncrementoIds([])
+      return
+    }
+    setIncrementoIds(idsObrigatorios(servicoSelecionado))
+  }, [servicoId])
 
   const handleSubmit = (values: FormValues) => {
+    if (temIncrementos && !incrementosOk) {
+      form.setError("root", { message: "Selecione ao menos uma especificação do serviço" })
+      return
+    }
     if (!selectedSlot) {
       form.setError("root", { message: "Selecione um horário" })
       return
@@ -206,6 +236,51 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
               />
             </div>
 
+            {servicoSelecionado && temIncrementos && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Especificações</p>
+                <div className="space-y-1.5">
+                  {servicoSelecionado.incrementos.map((inc) => {
+                    const checked = incrementoIds.includes(inc.id) || inc.obrigatorio
+                    return (
+                      <button
+                        key={inc.id}
+                        type="button"
+                        disabled={inc.obrigatorio}
+                        onClick={() => {
+                          if (inc.obrigatorio) return
+                          setIncrementoIds((prev) =>
+                            prev.includes(inc.id)
+                              ? prev.filter((x) => x !== inc.id)
+                              : [...prev, inc.id]
+                          )
+                        }}
+                        className={cn(
+                          "w-full flex items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition-colors",
+                          checked
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:bg-accent"
+                        )}
+                      >
+                        <span>
+                          {inc.nome}
+                          {inc.obrigatorio ? " (obrigatório)" : ""}
+                          <span className="text-muted-foreground">
+                            {" "}
+                            · {inc.duracao_minutos} min ·{" "}
+                            {inc.preco.toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}
+                          </span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Date / Hora */}
             <div>
               <p className="text-sm font-medium mb-2">Data / Hora</p>
@@ -223,6 +298,10 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
                     {!servicoId ? (
                       <p className="text-xs text-muted-foreground text-center py-6 px-3">
                         Selecione um serviço para ver horários disponíveis
+                      </p>
+                    ) : !incrementosOk ? (
+                      <p className="text-xs text-muted-foreground text-center py-6 px-3">
+                        Selecione as especificações do serviço
                       </p>
                     ) : slots.length === 0 ? (
                       <p className="text-xs text-muted-foreground text-center py-6 px-3">

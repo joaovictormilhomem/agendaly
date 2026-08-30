@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Loader2, CheckCircle2 } from "lucide-react"
 import type { BookingData } from "@/pages/public/AgendarPage"
+import { totaisServico } from "@/types/servico"
 
 interface ConfirmationStepProps {
   bookingData: BookingData
@@ -15,6 +16,11 @@ export function ConfirmationStep({ bookingData, onConfirm, isSubmitting }: Confi
   }
 
   const formattedDate = bookingData.date.toLocaleDateString("pt-BR")
+  const totais = totaisServico(bookingData.service, bookingData.incrementoIds)
+  const especificacoes =
+    totais.incrementos.length > 0
+      ? totais.incrementos.map((i) => i.nome).join(" + ")
+      : null
 
   return (
     <div className="space-y-6">
@@ -27,7 +33,11 @@ export function ConfirmationStep({ bookingData, onConfirm, isSubmitting }: Confi
           <div className="text-4xl">{bookingData.service.emoji}</div>
           <div>
             <h3 className="font-semibold text-foreground text-lg">{bookingData.service.nome}</h3>
-            <p className="text-sm text-muted-foreground">{bookingData.service.descricao}</p>
+            {especificacoes ? (
+              <p className="text-sm text-muted-foreground">{especificacoes}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">{bookingData.service.descricao}</p>
+            )}
           </div>
         </div>
 
@@ -44,12 +54,14 @@ export function ConfirmationStep({ bookingData, onConfirm, isSubmitting }: Confi
 
           <div className="flex justify-between py-2 border-b border-border/50">
             <span className="text-muted-foreground">Valor</span>
-            <span className="font-medium text-foreground">R$ {bookingData.service.preco.toFixed(2).replace(".", ",")}</span>
+            <span className="font-medium text-foreground">
+              {totais.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+            </span>
           </div>
 
           <div className="flex justify-between py-2 border-b border-border/50">
             <span className="text-muted-foreground">Duração</span>
-            <span className="font-medium text-foreground">{bookingData.service.duracao_minutos} min</span>
+            <span className="font-medium text-foreground">{totais.duracao_minutos} min</span>
           </div>
 
           <div className="flex justify-between py-2  border-b border-border/50">

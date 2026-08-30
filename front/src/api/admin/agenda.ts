@@ -52,9 +52,18 @@ export async function patchAgendamentoStatus(
   return data
 }
 
-export async function getAdminSlots(slug: string, date: Date, servicoId: string): Promise<string[]> {
+export async function getAdminSlots(
+  slug: string,
+  date: Date,
+  servicoId: string,
+  incrementoIds: string[] = []
+): Promise<string[]> {
   const { data } = await apiClient.get<string[]>(`/api/admin/${slug}/slots`, {
-    params: { data: format(date, "yyyy-MM-dd"), servicoId },
+    params: {
+      data: format(date, "yyyy-MM-dd"),
+      servicoId,
+      ...(incrementoIds.length > 0 ? { incremento_ids: incrementoIds.join(",") } : {}),
+    },
   })
   return data
 }

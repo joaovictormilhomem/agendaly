@@ -1,6 +1,7 @@
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import AgendamentoIncremento from '#models/agendamento_incremento'
 import Servico from '#models/servico'
 import User from '#models/user'
 
@@ -8,6 +9,7 @@ export type AgendamentoStatus = 'PENDENTE' | 'CONFIRMADO' | 'CANCELADO'
 
 export default class Agendamento extends BaseModel {
   static table = 'agendamentos'
+  static selfAssignPrimaryKey = true
 
   @column({ isPrimary: true })
   declare id: string
@@ -53,4 +55,7 @@ export default class Agendamento extends BaseModel {
 
   @belongsTo(() => Servico)
   declare servico: BelongsTo<typeof Servico>
+
+  @hasMany(() => AgendamentoIncremento)
+  declare incrementos: HasMany<typeof AgendamentoIncremento>
 }

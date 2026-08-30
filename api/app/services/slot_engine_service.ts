@@ -24,8 +24,14 @@ export function invalidateSlotCacheForUser(userId: string) {
   }
 }
 
-function cacheKey(userId: string, data: string, servicoId: string, mode: 'public' | 'manual') {
-  return `${userId}:${data}:${servicoId}:${mode}`
+function cacheKey(
+  userId: string,
+  data: string,
+  servicoId: string,
+  mode: 'public' | 'manual',
+  duracaoMinutos: number
+) {
+  return `${userId}:${data}:${servicoId}:${mode}:d${duracaoMinutos}`
 }
 
 function parseHhMm(s: string): { h: number; m: number } {
@@ -72,9 +78,12 @@ export default class SlotEngineService {
     data: string
     servico: Servico
     mode: SlotMode
+    /** Duração efetiva (base ou soma das especificações). */
+    duracaoMinutos?: number
   }): Promise<{ hora: string; disponivel: boolean }[]> {
     const { user, data, servico, mode } = params
-    const key = cacheKey(user.id, data, servico.id, mode)
+    const duracao = params.duracaoMinutos ?? servico.duracaoMinutos
+    const key = cacheKey(user.id, data, servico.id, mode, duracao)
     const now = DateTime.now().setZone(AGENDA_TIME_ZONE)
     const hit = slotCache.get(key)
     if (hit && hit.expires > Date.now()) {
@@ -104,7 +113,6 @@ export default class SlotEngineService {
 
     const intervaloApos = disp.intervaloAtendimentoMinutos
     const intervaloGrid = Math.max(MINIMUM_SLOT_GRID_MINUTES, intervaloApos)
-    const duracao = servico.duracaoMinutos
 
     const agendamentos = await Agendamento.query()
       .where('user_id', user.id)
@@ -198,10 +206,12 @@ export default class SlotEngineService {
     inicioUtc: DateTime
     bloqueadores: Agendamento[]
     intervaloAposMinutos: number
+    duracaoMinutos?: number
   }): boolean {
-    const { servico, inicioUtc, bloqueadores, intervaloAposMinutos } = params
+    const { inicioUtc, bloqueadores, intervaloAposMinutos } = params
+    const duracao = params.duracaoMinutos ?? params.servico.duracaoMinutos
     const c0 = inicioUtc
-    const c1 = inicioUtc.plus({ minutes: servico.duracaoMinutos + intervaloAposMinutos })
+    const c1 = inicioUtc.plus({ minutes: duracao + intervaloAposMinutos })
     const now = DateTime.utc()
     for (const a of bloqueadores) {
       if (a.status === 'CANCELADO') continue
@@ -223,11 +233,13 @@ export default class SlotEngineService {
     servico: Servico
     aposUtc: DateTime
     limite: number
+    duracaoMinutos?: number
   }): Promise<string[]> {
     const { user, servico, aposUtc, limite } = params
+    const duracaoMinutos = params.duracaoMinutos
     const zoned = aposUtc.setZone(AGENDA_TIME_ZONE)
     const data = zoned.toFormat('yyyy-LL-dd')
-    const slots = await this.computeSlots({ user, data, servico, mode: 'public' })
+    const slots = await this.computeSlots({ user, data, servico, mode: 'public', duracaoMinutos })
     const aposMin = minutesSinceMidnight(zoned)
     const horas: string[] = []
     for (const s of slots) {
@@ -243,7 +255,13 @@ export default class SlotEngineService {
       const nextDay = DateTime.fromFormat(data, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE })
         .plus({ days: 1 })
         .toFormat('yyyy-LL-dd')
-      const slots2 = await this.computeSlots({ user, data: nextDay, servico, mode: 'public' })
+      const slots2 = await this.computeSlots({
+        user,
+        data: nextDay,
+        servico,
+        mode: 'public',
+        duracaoMinutos,
+      })
       for (const s of slots2) {
         if (!s.disponivel) continue
         horas.push(s.hora)
@@ -260,8 +278,10 @@ export default class SlotEngineService {
     user: User
     servico: Servico
     inicioUtc: DateTime
+    duracaoMinutos?: number
   }): Promise<boolean> {
     const { user, servico, inicioUtc } = params
+    const duracao = params.duracaoMinutos ?? servico.duracaoMinutos
     const z = inicioUtc.setZone(AGENDA_TIME_ZONE)
     const data = z.toFormat('yyyy-LL-dd')
     const dayStart = DateTime.fromFormat(data, 'yyyy-LL-dd', { zone: AGENDA_TIME_ZONE }).startOf(
@@ -294,7 +314,6 @@ export default class SlotEngineService {
     if (!diaCfg?.ativo) return false
 
     const zMinutes = z.hour * 60 + z.minute + z.second / 60
-    const duracao = servico.duracaoMinutos
     let dentroDeTurno = false
     for (const intervalo of diaCfg.intervalos) {
       const { h: h0, m: m0 } = parseHhMm(intervalo.hora_inicio)
@@ -325,6 +344,7 @@ export default class SlotEngineService {
       inicioUtc,
       bloqueadores: agendamentos,
       intervaloAposMinutos: intervaloApos,
+      duracaoMinutos: duracao,
     })
   }
 

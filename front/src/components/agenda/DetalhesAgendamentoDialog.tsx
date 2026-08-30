@@ -86,7 +86,19 @@ export function DetalhesAgendamentoDialog({ agendamento, open, onOpenChange, slu
         <div className="space-y-4">
           <div className="flex items-center gap-2 rounded-lg bg-secondary/50 px-3 py-2">
             <span className="text-xl">{agendamento.servico.emoji}</span>
-            <p className="text-sm font-semibold text-foreground">{agendamento.servico.nome}</p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">{agendamento.servico.nome}</p>
+              {(agendamento.servico.incrementos?.length ?? 0) > 0 && (
+                <p className="text-xs text-muted-foreground truncate">
+                  {agendamento.servico.incrementos!.map((i) => i.nome).join(" + ")}
+                  {" · "}
+                  {agendamento.servico.preco.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-3">

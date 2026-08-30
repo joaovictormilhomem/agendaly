@@ -1,9 +1,22 @@
 import User from '#models/user'
 import Servico from '#models/servico'
+import { resolverTotaisServico } from '#helpers/servico_incrementos'
 import SlotEngineService from '#services/slot_engine_service'
 import type { HttpContext } from '@adonisjs/core/http'
 
 const slotEngine = new SlotEngineService()
+
+function parseIncrementoIds(raw: unknown): string[] {
+  if (raw === undefined || raw === null || raw === '') return []
+  if (Array.isArray(raw)) return raw.map(String).filter(Boolean)
+  if (typeof raw === 'string') {
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  }
+  return []
+}
 
 export default class AdminSlotsController {
   /**
@@ -24,11 +37,27 @@ export default class AdminSlotsController {
       .where('id', servicoId)
       .where('user_id', user.id)
       .where('ativo', true)
+      .preload('incrementos')
       .first()
 
     if (!servico) return response.notFound({ message: 'Serviço não encontrado' })
 
-    const slots = await slotEngine.computeSlots({ user, data, servico, mode: 'manual' })
+    const resolved = resolverTotaisServico(
+      servico,
+      servico.incrementos ?? [],
+      parseIncrementoIds(request.input('incremento_ids'))
+    )
+    if (!resolved.ok) {
+      return response.unprocessableEntity({ message: resolved.message })
+    }
+
+    const slots = await slotEngine.computeSlots({
+      user,
+      data,
+      servico,
+      mode: 'manual',
+      duracaoMinutos: resolved.totais.duracao_minutos,
+    })
     return response.ok(slots.map((s) => s.hora))
   }
 }

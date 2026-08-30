@@ -22,6 +22,13 @@ function formatarDataHoraLocal(iso: string | null | undefined): string {
   return dt.toFormat("dd/MM/yyyy 'às' HH:mm")
 }
 
+function descricaoServico(ag: Agendamento): string {
+  const base = ag.servico.nome
+  const incs = ag.incrementos ?? []
+  if (incs.length === 0) return base
+  return `${base} (${incs.map((i) => i.nome).join(' + ')})`
+}
+
 export default class NotificacaoAgendamentoService {
   private async nomeProfissionalParaCliente(ag: Agendamento): Promise<string> {
     await ag.load('user', (q) => q.preload('configuracao'))
@@ -58,9 +65,10 @@ export default class NotificacaoAgendamentoService {
    */
   async agendamentoCriado(agendamento: Agendamento, contexto: 'publico' | 'manual_admin') {
     await agendamento.load('servico')
+    await agendamento.load('incrementos')
     const nomeProf = await this.nomeProfissionalParaCliente(agendamento)
     const quando = formatarDataHoraLocal(agendamento.dataHoraInicio.toISO()!)
-    const servico = agendamento.servico.nome
+    const servico = descricaoServico(agendamento)
 
     let corpo: string
     if (agendamento.status === 'PENDENTE') {
@@ -78,9 +86,10 @@ export default class NotificacaoAgendamentoService {
    */
   async agendamentoConfirmadoPeloAdmin(agendamento: Agendamento) {
     await agendamento.load('servico')
+    await agendamento.load('incrementos')
     const nomeProf = await this.nomeProfissionalParaCliente(agendamento)
     const quando = formatarDataHoraLocal(agendamento.dataHoraInicio.toISO()!)
-    const servico = agendamento.servico.nome
+    const servico = descricaoServico(agendamento)
     const corpo = `Olá, ${agendamento.clienteNome}! ✅\n\nSeu horário com *${nomeProf}* foi *confirmado*.\n\n📅 *${quando}*\n✨ ${servico}`
     await this.enviarSeConectado(agendamento.userId, agendamento.clienteWhatsapp, corpo)
     logger.info({ agendamentoId: agendamento.id }, '[notificacao] confirmado pelo admin')
@@ -91,9 +100,10 @@ export default class NotificacaoAgendamentoService {
    */
   async agendamentoCancelado(agendamento: Agendamento, motivo: string | null) {
     await agendamento.load('servico')
+    await agendamento.load('incrementos')
     const nomeProf = await this.nomeProfissionalParaCliente(agendamento)
     const quando = formatarDataHoraLocal(agendamento.dataHoraInicio.toISO()!)
-    const servico = agendamento.servico.nome
+    const servico = descricaoServico(agendamento)
     const extra = motivo?.trim() ? `\n\nMotivo: ${motivo.trim()}` : ''
     const corpo = `Olá, ${agendamento.clienteNome}.\n\nInformamos que seu agendamento com *${nomeProf}* foi *cancelado*.\n\n📅 Era em *${quando}*\n✨ ${servico}${extra}\n\nQualquer dúvida, fale com a profissional pelo canal de contato habitual.`
     await this.enviarSeConectado(agendamento.userId, agendamento.clienteWhatsapp, corpo)

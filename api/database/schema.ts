@@ -20,6 +20,25 @@ export class AgendamentoCancelamentoSchema extends BaseModel {
   declare motivo: string | null
 }
 
+export class AgendamentoIncrementoSchema extends BaseModel {
+  static $columns = ['agendamentoId', 'createdAt', 'duracaoMinutos', 'id', 'nome', 'preco', 'servicoIncrementoId'] as const
+  $columns = AgendamentoIncrementoSchema.$columns
+  @column()
+  declare agendamentoId: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare duracaoMinutos: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare nome: string
+  @column()
+  declare preco: string
+  @column()
+  declare servicoIncrementoId: string | null
+}
+
 export class AgendamentoSchema extends BaseModel {
   static $columns = ['clienteEmail', 'clienteNome', 'clienteWhatsapp', 'createdAt', 'dataHoraFim', 'dataHoraInicio', 'id', 'notasInternas', 'servicoId', 'status', 'statusConfirmacao', 'updatedAt', 'userId'] as const
   $columns = AgendamentoSchema.$columns
@@ -181,6 +200,29 @@ export class DisponibilidadeSchema extends BaseModel {
   declare updatedAt: DateTime | null
   @column()
   declare userId: string
+}
+
+export class ServicoIncrementoSchema extends BaseModel {
+  static $columns = ['createdAt', 'duracaoMinutos', 'id', 'nome', 'obrigatorio', 'ordem', 'preco', 'servicoId', 'updatedAt'] as const
+  $columns = ServicoIncrementoSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare duracaoMinutos: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare nome: string
+  @column()
+  declare obrigatorio: boolean
+  @column()
+  declare ordem: number
+  @column()
+  declare preco: string
+  @column()
+  declare servicoId: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class ServicoSchema extends BaseModel {

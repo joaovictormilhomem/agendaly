@@ -5,6 +5,7 @@ export interface AgendamentoServico {
   emoji: string
   duracao_minutos: number
   preco: number
+  incrementos?: { id: string; nome: string; duracao_minutos: number; preco: number }[]
 }
 
 export interface Agendamento {
@@ -31,6 +32,7 @@ export interface AgendamentoManualCreate {
   cliente_email?: string
   cliente_whatsapp: string
   servicoId: string
+  incremento_ids?: string[]
   data_hora_inicio: string
   notas_internas?: string
 }
@@ -63,6 +65,7 @@ export interface AgendarPublicBody {
   cliente_whatsapp: string
   cliente_email?: string
   servicoId: string
+  incremento_ids?: string[]
   slot_datetime: string
 }
 

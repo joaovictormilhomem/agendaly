@@ -221,6 +221,25 @@ export class DisponibilidadeSchema extends BaseModel {
   declare userId: string
 }
 
+export class PortfolioImagenSchema extends BaseModel {
+  static $columns = ['arquivo', 'contentType', 'createdAt', 'id', 'ordem', 'updatedAt', 'userId'] as const
+  $columns = PortfolioImagenSchema.$columns
+  @column()
+  declare arquivo: Buffer
+  @column()
+  declare contentType: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare ordem: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
+}
+
 export class ServicoIncrementoAdicionaiSchema extends BaseModel {
   static $columns = ['createdAt', 'duracaoMinutos', 'id', 'nome', 'ordem', 'preco', 'servicoIncrementoId', 'updatedAt'] as const
   $columns = ServicoIncrementoAdicionaiSchema.$columns

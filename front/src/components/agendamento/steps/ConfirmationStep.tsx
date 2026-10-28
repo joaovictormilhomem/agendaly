@@ -16,11 +16,13 @@ export function ConfirmationStep({ bookingData, onConfirm, isSubmitting }: Confi
   }
 
   const formattedDate = bookingData.date.toLocaleDateString("pt-BR")
-  const totais = totaisServico(bookingData.service, bookingData.incrementoIds)
-  const especificacoes =
-    totais.incrementos.length > 0
-      ? totais.incrementos.map((i) => i.nome).join(" + ")
-      : null
+  const totais = totaisServico(bookingData.service, bookingData.incrementoIds, bookingData.incrementoAdicionalIds)
+  const especificacoes = totais.incrementos
+  const adicionaisPorEspecificacao = especificacoes.map((especificacao) => ({
+    ...especificacao,
+    adicionais: (bookingData.service!.incrementos.find((i) => i.id === especificacao.id)?.adicionais ?? [])
+      .filter((adicional) => bookingData.incrementoAdicionalIds.includes(adicional.id)),
+  }))
 
   return (
     <div className="space-y-6">
@@ -33,8 +35,17 @@ export function ConfirmationStep({ bookingData, onConfirm, isSubmitting }: Confi
           <div className="text-4xl">{bookingData.service.emoji}</div>
           <div>
             <h3 className="font-semibold text-foreground text-lg">{bookingData.service.nome}</h3>
-            {especificacoes ? (
-              <p className="text-sm text-muted-foreground">{especificacoes}</p>
+            {especificacoes.length > 0 ? (
+              <div className="mt-1 space-y-1 text-sm text-muted-foreground">
+                {adicionaisPorEspecificacao.map((especificacao) => (
+                  <p key={especificacao.id}>
+                    {especificacao.nome}
+                    {especificacao.adicionais.length > 0 && (
+                      <span> · {especificacao.adicionais.map((adicional) => adicional.nome).join(" + ")}</span>
+                    )}
+                  </p>
+                ))}
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground">{bookingData.service.descricao}</p>
             )}

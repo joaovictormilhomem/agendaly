@@ -26,7 +26,7 @@ function descricaoServico(ag: Agendamento): string {
   const base = ag.servico.nome
   const incs = ag.incrementos ?? []
   if (incs.length === 0) return base
-  return `${base} (${incs.map((i) => i.nome).join(' + ')})`
+  return `${base} (${incs.map((i) => [i.nome, ...(i.adicionais ?? []).map((a) => a.nome)].join(' + ')).join(' + ')})`
 }
 
 export default class NotificacaoAgendamentoService {
@@ -65,7 +65,7 @@ export default class NotificacaoAgendamentoService {
    */
   async agendamentoCriado(agendamento: Agendamento, contexto: 'publico' | 'manual_admin') {
     await agendamento.load('servico')
-    await agendamento.load('incrementos')
+    await agendamento.load('incrementos', (q) => q.preload('adicionais'))
     const nomeProf = await this.nomeProfissionalParaCliente(agendamento)
     const quando = formatarDataHoraLocal(agendamento.dataHoraInicio.toISO()!)
     const servico = descricaoServico(agendamento)
@@ -86,7 +86,7 @@ export default class NotificacaoAgendamentoService {
    */
   async agendamentoConfirmadoPeloAdmin(agendamento: Agendamento) {
     await agendamento.load('servico')
-    await agendamento.load('incrementos')
+    await agendamento.load('incrementos', (q) => q.preload('adicionais'))
     const nomeProf = await this.nomeProfissionalParaCliente(agendamento)
     const quando = formatarDataHoraLocal(agendamento.dataHoraInicio.toISO()!)
     const servico = descricaoServico(agendamento)
@@ -100,7 +100,7 @@ export default class NotificacaoAgendamentoService {
    */
   async agendamentoCancelado(agendamento: Agendamento, motivo: string | null) {
     await agendamento.load('servico')
-    await agendamento.load('incrementos')
+    await agendamento.load('incrementos', (q) => q.preload('adicionais'))
     const nomeProf = await this.nomeProfissionalParaCliente(agendamento)
     const quando = formatarDataHoraLocal(agendamento.dataHoraInicio.toISO()!)
     const servico = descricaoServico(agendamento)

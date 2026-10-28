@@ -7,6 +7,7 @@ export type IncrementoResolvido = {
   duracao_minutos: number
   preco: number
   obrigatorio: boolean
+  adicionais: { id: string; nome: string; duracao_minutos: number; preco: number }[]
 }
 
 export type TotaisServico = {
@@ -23,6 +24,15 @@ export function serializeIncremento(i: ServicoIncremento) {
     preco: Number(i.preco),
     obrigatorio: i.obrigatorio,
     ordem: i.ordem,
+    adicionais: [...(i.adicionais ?? [])]
+      .sort((a, b) => a.ordem - b.ordem || a.nome.localeCompare(b.nome))
+      .map((a) => ({
+        id: a.id,
+        nome: a.nome,
+        duracao_minutos: a.duracaoMinutos,
+        preco: Number(a.preco),
+        ordem: a.ordem,
+      })),
   }
 }
 
@@ -37,10 +47,11 @@ export function duracaoIncrementoValida(duracao: number) {
 export function resolverTotaisServico(
   servico: Servico,
   incrementosDoServico: ServicoIncremento[],
-  incrementoIdsSelecionados: string[] | undefined | null
+  incrementoIdsSelecionados: string[] | undefined | null,
+  adicionalIdsSelecionados: string[] | undefined | null = []
 ): { ok: true; totais: TotaisServico } | { ok: false; message: string } {
   if (incrementosDoServico.length === 0) {
-    if (incrementoIdsSelecionados && incrementoIdsSelecionados.length > 0) {
+    if ((incrementoIdsSelecionados && incrementoIdsSelecionados.length > 0) || (adicionalIdsSelecionados?.length ?? 0) > 0) {
       return { ok: false, message: 'Este serviço não possui especificações' }
     }
     return {
@@ -85,9 +96,33 @@ export function resolverTotaisServico(
       duracao_minutos: inc.duracaoMinutos,
       preco: Number(inc.preco),
       obrigatorio: inc.obrigatorio,
+      adicionais: [],
     })
     duracao += inc.duracaoMinutos
     preco += Number(inc.preco)
+  }
+
+  const adicionaisPorId = new Map(
+    incrementosDoServico.flatMap((inc) =>
+      (inc.adicionais ?? []).map((a) => [a.id, { adicional: a, incrementoId: inc.id }] as const)
+    )
+  )
+  const adicionaisSelecionados = [...new Set(adicionalIdsSelecionados ?? [])]
+  for (const id of adicionaisSelecionados) {
+    const encontrado = adicionaisPorId.get(id)
+    if (!encontrado || !selected.has(encontrado.incrementoId)) {
+      return { ok: false, message: 'Adicional invÃ¡lido para as especificaÃ§Ãµes selecionadas' }
+    }
+    const destino = resolvidos.find((inc) => inc.id === encontrado.incrementoId)!
+    const adicional = encontrado.adicional
+    destino.adicionais.push({
+      id: adicional.id,
+      nome: adicional.nome,
+      duracao_minutos: adicional.duracaoMinutos,
+      preco: Number(adicional.preco),
+    })
+    duracao += adicional.duracaoMinutos
+    preco += Number(adicional.preco)
   }
 
   resolvidos.sort((a, b) => {

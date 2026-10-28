@@ -14,13 +14,14 @@ import { cn } from "@/lib/utils"
 
 interface ServiceSelectionStepProps {
   slug: string
-  onServiceSelect: (service: Servico, incrementoIds: string[]) => void
+  onServiceSelect: (service: Servico, incrementoIds: string[], incrementoAdicionalIds: string[]) => void
 }
 
 export function ServiceSelectionStep({ slug, onServiceSelect }: ServiceSelectionStepProps) {
   const [services, setServices] = useState<Servico[]>([])
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null)
   const [selectedIncrementoIds, setSelectedIncrementoIds] = useState<string[]>([])
+  const [selectedAdicionalIds, setSelectedAdicionalIds] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export function ServiceSelectionStep({ slug, onServiceSelect }: ServiceSelection
   const handleSelectService = (service: Servico) => {
     setSelectedServiceId(service.id)
     setSelectedIncrementoIds(idsObrigatorios(service))
+    setSelectedAdicionalIds([])
   }
 
   const toggleIncremento = (id: string, obrigatorio: boolean) => {
@@ -50,6 +52,10 @@ export function ServiceSelectionStep({ slug, onServiceSelect }: ServiceSelection
     setSelectedIncrementoIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     )
+  }
+
+  const toggleAdicional = (id: string) => {
+    setSelectedAdicionalIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
   }
 
   const canContinue =
@@ -61,7 +67,12 @@ export function ServiceSelectionStep({ slug, onServiceSelect }: ServiceSelection
     const ids = hasIncrementos
       ? [...new Set([...idsObrigatorios(selected), ...selectedIncrementoIds])]
       : []
-    onServiceSelect(selected, ids)
+    const adicionaisValidos = selected.incrementos
+      .filter((inc) => ids.includes(inc.id))
+      .flatMap((inc) => inc.adicionais ?? [])
+      .filter((adicional) => selectedAdicionalIds.includes(adicional.id))
+      .map((adicional) => adicional.id)
+    onServiceSelect(selected, ids, adicionaisValidos)
   }
 
   if (isLoading) {
@@ -79,7 +90,7 @@ export function ServiceSelectionStep({ slug, onServiceSelect }: ServiceSelection
           const isSelected = selectedServiceId === service.id
           const showOpcoes = isSelected && (service.incrementos?.length ?? 0) > 0
           const totaisCard =
-            showOpcoes && selected ? totaisServico(service, selectedIncrementoIds) : null
+            showOpcoes && selected ? totaisServico(service, selectedIncrementoIds, selectedAdicionalIds) : null
 
           return (
             <Card
@@ -135,8 +146,8 @@ export function ServiceSelectionStep({ slug, onServiceSelect }: ServiceSelection
                     const checked =
                       selectedIncrementoIds.includes(inc.id) || inc.obrigatorio
                     return (
+                      <div key={inc.id} className="space-y-1.5">
                       <button
-                        key={inc.id}
                         type="button"
                         disabled={inc.obrigatorio}
                         onClick={() => toggleIncremento(inc.id, inc.obrigatorio)}
@@ -169,6 +180,29 @@ export function ServiceSelectionStep({ slug, onServiceSelect }: ServiceSelection
                           <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
                         )}
                       </button>
+                      {checked && (inc.adicionais?.length ?? 0) > 0 && (
+                        <div className="ml-3 space-y-1.5 border-l border-border pl-3">
+                          <p className="text-xs font-medium text-muted-foreground">Adicionais opcionais</p>
+                          {(inc.adicionais ?? []).map((adicional) => {
+                            const adicionalSelecionado = selectedAdicionalIds.includes(adicional.id)
+                            return (
+                              <button
+                                key={adicional.id}
+                                type="button"
+                                onClick={() => toggleAdicional(adicional.id)}
+                                className={cn(
+                                  "w-full flex items-center justify-between rounded-md border px-3 py-2 text-left text-sm",
+                                  adicionalSelecionado ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                                )}
+                              >
+                                <span>{adicional.nome} <span className="text-muted-foreground">· +{adicional.duracao_minutos} min · +{adicional.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span></span>
+                                {adicionalSelecionado && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                      </div>
                     )
                   })}
                 </div>

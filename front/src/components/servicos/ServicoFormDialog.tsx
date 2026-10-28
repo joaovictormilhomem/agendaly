@@ -29,6 +29,12 @@ const incrementoSchema = z.object({
     .refine((value) => value % 15 === 0, "Use intervalos de 15 minutos"),
   preco: z.coerce.number().min(0, "Informe um valor válido"),
   obrigatorio: z.boolean(),
+  adicionais: z.array(z.object({
+    id: z.string().optional(),
+    nome: z.string().min(1, "Nome Ã© obrigatÃ³rio"),
+    duracao_minutos: z.coerce.number().int().min(15).refine((value) => value % 15 === 0, "Use intervalos de 15 minutos"),
+    preco: z.coerce.number().min(0, "Informe um valor vÃ¡lido"),
+  })).default([]),
 })
 
 const servicoSchema = z.object({
@@ -93,6 +99,7 @@ export function ServicoFormDialog({ open, onOpenChange, servico, onSubmit, isPen
                 duracao_minutos: i.duracao_minutos,
                 preco: i.preco,
                 obrigatorio: i.obrigatorio,
+                adicionais: (i.adicionais ?? []).map((a) => ({ id: a.id, nome: a.nome, duracao_minutos: a.duracao_minutos, preco: a.preco })),
               })),
             }
           : {
@@ -123,6 +130,7 @@ export function ServicoFormDialog({ open, onOpenChange, servico, onSubmit, isPen
         preco: i.preco,
         obrigatorio: i.obrigatorio,
         ordem: idx,
+        adicionais: i.adicionais.map((a, adicionalIdx) => ({ ...a, ordem: adicionalIdx })),
       })),
     })
   }
@@ -258,6 +266,7 @@ export function ServicoFormDialog({ open, onOpenChange, servico, onSubmit, isPen
                       duracao_minutos: 30,
                       preco: 0,
                       obrigatorio: false,
+                      adicionais: [],
                     })
                   }
                 >
@@ -348,6 +357,30 @@ export function ServicoFormDialog({ open, onOpenChange, servico, onSubmit, isPen
                           </div>
                         )}
                       />
+                      <div className="space-y-2 rounded-md border border-dashed border-border p-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-medium">Adicionais</p>
+                            <p className="text-xs text-muted-foreground">Opcionais e somados a esta especificaÃ§Ã£o.</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => form.setValue(`incrementos.${index}.adicionais`, [...(form.getValues(`incrementos.${index}.adicionais`) ?? []), { nome: "", duracao_minutos: 15, preco: 0 }])}
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Adicionar
+                          </Button>
+                        </div>
+                        {(form.watch(`incrementos.${index}.adicionais`) ?? []).map((_, adicionalIndex) => (
+                          <div key={adicionalIndex} className="grid grid-cols-[1fr_92px_92px_auto] gap-2 items-end">
+                            <FormField control={form.control} name={`incrementos.${index}.adicionais.${adicionalIndex}.nome`} render={({ field: f }) => <FormItem><FormLabel className="text-xs">Nome</FormLabel><FormControl><Input placeholder="Ex: Francesinha" {...f} className="bg-white" /></FormControl><FormMessage /></FormItem>} />
+                            <FormField control={form.control} name={`incrementos.${index}.adicionais.${adicionalIndex}.duracao_minutos`} render={({ field: f }) => <FormItem><FormLabel className="text-xs">Min</FormLabel><FormControl><Input type="number" min={15} step={15} {...f} className="bg-white" /></FormControl><FormMessage /></FormItem>} />
+                            <FormField control={form.control} name={`incrementos.${index}.adicionais.${adicionalIndex}.preco`} render={({ field: f }) => <FormItem><FormLabel className="text-xs">R$</FormLabel><FormControl><Input type="number" min={0} step={0.01} {...f} className="bg-white" /></FormControl><FormMessage /></FormItem>} />
+                            <Button type="button" variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive h-8 w-8 p-0" onClick={() => form.setValue(`incrementos.${index}.adicionais`, (form.getValues(`incrementos.${index}.adicionais`) ?? []).filter((_, i) => i !== adicionalIndex))}><Trash2 className="h-4 w-4" /></Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>

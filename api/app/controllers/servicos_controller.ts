@@ -1,5 +1,6 @@
 import Servico from '#models/servico'
 import ServicoIncremento from '#models/servico_incremento'
+import ServicoIncrementoAdicional from '#models/servico_incremento_adicional'
 import User from '#models/user'
 import {
   duracaoAPartirDe,
@@ -21,6 +22,7 @@ type IncrementoInput = {
   preco: number
   obrigatorio: boolean
   ordem?: number
+  adicionais?: { id?: string; nome: string; duracao_minutos: number; preco: number; ordem?: number }[]
 }
 
 function serializeServico(s: Servico) {
@@ -56,8 +58,42 @@ function validarIncrementosPayload(incrementos: IncrementoInput[] | undefined) {
     if (inc.preco < 0) {
       return 'O preço da especificação não pode ser negativo'
     }
+    for (const adicional of inc.adicionais ?? []) {
+      if (!duracaoIncrementoValida(adicional.duracao_minutos)) {
+        return 'Cada adicional deve ter duraÃ§Ã£o de no mÃ­nimo 15 minutos e avanÃ§ar de 15 em 15'
+      }
+      if (adicional.preco < 0) return 'O preÃ§o do adicional nÃ£o pode ser negativo'
+    }
   }
   return null
+}
+
+async function syncAdicionais(
+  incremento: ServicoIncremento,
+  adicionais: IncrementoInput['adicionais'],
+  trx?: TransactionClientContract
+) {
+  const q = ServicoIncrementoAdicional.query()
+  if (trx) q.useTransaction(trx)
+  const existentes = await q.where('servico_incremento_id', incremento.id)
+  const keepIds = new Set((adicionais ?? []).map((a) => a.id).filter(Boolean) as string[])
+  for (const existente of existentes) {
+    if (!keepIds.has(existente.id)) {
+      if (trx) existente.useTransaction(trx)
+      await existente.delete()
+    }
+  }
+  for (const [ordem, item] of (adicionais ?? []).entries()) {
+    const data = { nome: item.nome.trim(), duracaoMinutos: item.duracao_minutos, preco: item.preco, ordem: item.ordem ?? ordem }
+    const existente = item.id ? existentes.find((a) => a.id === item.id) : undefined
+    if (existente) {
+      if (trx) existente.useTransaction(trx)
+      existente.merge(data)
+      await existente.save()
+    } else {
+      await ServicoIncrementoAdicional.create({ id: crypto.randomUUID(), servicoIncrementoId: incremento.id, ...data }, trx ? { client: trx } : undefined)
+    }
+  }
 }
 
 async function syncIncrementos(
@@ -96,11 +132,12 @@ async function syncIncrementos(
         if (trx) found.useTransaction(trx)
         found.merge(data)
         await found.save()
+        await syncAdicionais(found, item.adicionais, trx)
         continue
       }
     }
 
-    await ServicoIncremento.create(
+    const created = await ServicoIncremento.create(
       {
         id: crypto.randomUUID(),
         servicoId: servico.id,
@@ -108,6 +145,7 @@ async function syncIncrementos(
       },
       trx ? { client: trx } : undefined
     )
+    await syncAdicionais(created, item.adicionais, trx)
   }
 }
 
@@ -135,7 +173,7 @@ export default class ServicosController {
 
     const servicos = await Servico.query()
       .where('user_id', user.id)
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .orderBy('created_at', 'asc')
 
     return response.ok(servicos.map(serializeServico))
@@ -170,7 +208,7 @@ export default class ServicosController {
       )
       created.useTransaction(trx)
       await syncIncrementos(created, body.incrementos, trx)
-      await created.load('incrementos')
+      await created.load('incrementos', (q) => q.preload('adicionais'))
       return created
     })
 
@@ -210,7 +248,7 @@ export default class ServicosController {
       await syncIncrementos(servico, body.incrementos, trx)
     })
 
-    await servico.load('incrementos')
+    await servico.load('incrementos', (q) => q.preload('adicionais'))
     invalidateSlotCacheForUser(user.id)
 
     return response.ok(serializeServico(servico))
@@ -238,7 +276,7 @@ export default class ServicosController {
     const servicos = await Servico.query()
       .where('user_id', user.id)
       .where('ativo', true)
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .orderBy('created_at', 'asc')
 
     return response.ok(servicos.map(serializeServico))

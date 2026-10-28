@@ -1,3 +1,11 @@
+export interface ServicoIncrementoAdicional {
+  id: string
+  nome: string
+  duracao_minutos: number
+  preco: number
+  ordem: number
+}
+
 export interface ServicoIncremento {
   id: string
   nome: string
@@ -5,6 +13,7 @@ export interface ServicoIncremento {
   preco: number
   obrigatorio: boolean
   ordem: number
+  adicionais?: ServicoIncrementoAdicional[]
 }
 
 export type ServicoIncrementoInput = {
@@ -14,6 +23,7 @@ export type ServicoIncrementoInput = {
   preco: number
   obrigatorio: boolean
   ordem?: number
+  adicionais?: Array<Omit<ServicoIncrementoAdicional, "id"> & { id?: string }>
 }
 
 export interface Servico {
@@ -46,7 +56,8 @@ export type ServicoUpdate = Partial<ServicoCreate>
 /** Totais a partir das especificações escolhidas (ou base, se não houver). */
 export function totaisServico(
   servico: Servico,
-  incrementoIds: string[]
+  incrementoIds: string[],
+  adicionalIds: string[] = []
 ): { preco: number; duracao_minutos: number; incrementos: ServicoIncremento[] } {
   const lista = servico.incrementos ?? []
   if (lista.length === 0) {
@@ -61,9 +72,10 @@ export function totaisServico(
     if (inc.obrigatorio) selected.add(inc.id)
   }
   const escolhidos = lista.filter((i) => selected.has(i.id))
+  const adicionais = escolhidos.flatMap((i) => (i.adicionais ?? []).filter((a) => adicionalIds.includes(a.id)))
   return {
-    preco: escolhidos.reduce((s, i) => s + i.preco, 0),
-    duracao_minutos: escolhidos.reduce((s, i) => s + i.duracao_minutos, 0),
+    preco: escolhidos.reduce((s, i) => s + i.preco, 0) + adicionais.reduce((s, a) => s + a.preco, 0),
+    duracao_minutos: escolhidos.reduce((s, i) => s + i.duracao_minutos, 0) + adicionais.reduce((s, a) => s + a.duracao_minutos, 0),
     incrementos: escolhidos,
   }
 }

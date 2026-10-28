@@ -1,7 +1,8 @@
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import Servico from '#models/servico'
+import ServicoIncrementoAdicional from '#models/servico_incremento_adicional'
 
 export default class ServicoIncremento extends BaseModel {
   static table = 'servico_incrementos'
@@ -36,4 +37,7 @@ export default class ServicoIncremento extends BaseModel {
 
   @belongsTo(() => Servico)
   declare servico: BelongsTo<typeof Servico>
+
+  @hasMany(() => ServicoIncrementoAdicional)
+  declare adicionais: HasMany<typeof ServicoIncrementoAdicional>
 }

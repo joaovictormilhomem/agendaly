@@ -89,14 +89,22 @@ export function DetalhesAgendamentoDialog({ agendamento, open, onOpenChange, slu
             <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground">{agendamento.servico.nome}</p>
               {(agendamento.servico.incrementos?.length ?? 0) > 0 && (
-                <p className="text-xs text-muted-foreground truncate">
+                <div className="text-xs text-muted-foreground">
                   {agendamento.servico.incrementos!.map((i) => i.nome).join(" + ")}
                   {" · "}
                   {agendamento.servico.preco.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   })}
-                </p>
+                <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                  {agendamento.servico.incrementos!.map((i) => (
+                    <p key={i.id}>
+                      {i.nome}
+                      {(i.adicionais?.length ?? 0) > 0 && ` · ${i.adicionais!.map((adicional) => adicional.nome).join(" + ")}`}
+                    </p>
+                  ))}
+                </div>
+                </div>
               )}
             </div>
           </div>

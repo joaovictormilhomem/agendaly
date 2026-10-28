@@ -8,6 +8,7 @@ export const publicAgendarValidator = vine.compile(
     cliente_email: vine.string().trim().email().optional(),
     servicoId: vineUuidLike(),
     incremento_ids: vine.array(vineUuidLike()).optional(),
+    incremento_adicional_ids: vine.array(vineUuidLike()).optional(),
     slot_datetime: vine.string().trim().minLength(10),
   })
 )

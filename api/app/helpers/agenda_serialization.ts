@@ -7,13 +7,19 @@ export function serializeAgendamentoListItem(a: Agendamento) {
     nome: i.nome,
     duracao_minutos: i.duracaoMinutos,
     preco: Number(i.preco),
+    adicionais: (i.adicionais ?? []).map((adicional) => ({
+      id: adicional.id,
+      nome: adicional.nome,
+      duracao_minutos: adicional.duracaoMinutos,
+      preco: Number(adicional.preco),
+    })),
   }))
   const temIncrementos = incrementos.length > 0
   const duracao = temIncrementos
-    ? incrementos.reduce((sum, i) => sum + i.duracao_minutos, 0)
+    ? incrementos.reduce((sum, i) => sum + i.duracao_minutos + i.adicionais.reduce((s, ad) => s + ad.duracao_minutos, 0), 0)
     : s.duracaoMinutos
   const preco = temIncrementos
-    ? incrementos.reduce((sum, i) => sum + i.preco, 0)
+    ? incrementos.reduce((sum, i) => sum + i.preco + i.adicionais.reduce((s, ad) => s + ad.preco, 0), 0)
     : Number(s.preco)
 
   return {

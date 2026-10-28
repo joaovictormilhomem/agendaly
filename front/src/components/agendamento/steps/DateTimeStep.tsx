@@ -12,6 +12,7 @@ interface DateTimeStepProps {
   slug: string
   service: Servico
   incrementoIds?: string[]
+  incrementoAdicionalIds?: string[]
   bookedDates?: Date[]
   onSelect: (date: Date, time: string) => void
 }
@@ -20,6 +21,7 @@ export function DateTimeStep({
   slug,
   service,
   incrementoIds = [],
+  incrementoAdicionalIds = [],
   bookedDates = [],
   onSelect,
 }: DateTimeStepProps) {
@@ -33,7 +35,7 @@ export function DateTimeStep({
     if (!selectedDate) return
     setIsLoadingSlots(true)
     setSelectedTime(null)
-    getSlotsDisponiveis(slug, selectedDate, service.id, incrementoIds)
+    getSlotsDisponiveis(slug, selectedDate, service.id, incrementoIds, incrementoAdicionalIds)
       .then((rows) => setSlots(rows.filter((r) => r.disponivel).map((r) => r.hora)))
       .catch((err: unknown) => {
         console.error(err)
@@ -41,7 +43,7 @@ export function DateTimeStep({
         toast.error("Não foi possível carregar os horários. Verifique se o serviço está ativo e tente outra data.")
       })
       .finally(() => setIsLoadingSlots(false))
-  }, [slug, selectedDate, service.id, incrementoIds])
+  }, [slug, selectedDate, service.id, incrementoIds, incrementoAdicionalIds])
 
   const isDateDisabled = (date: Date) => {
     const today = new Date()

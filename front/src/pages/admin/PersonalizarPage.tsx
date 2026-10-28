@@ -169,7 +169,7 @@ export function PersonalizarPage() {
               </TabsContent>
 
               <TabsContent value="portfolio">
-                <PortfolioTab />
+                <PortfolioTab slug={slug ?? ""} />
               </TabsContent>
 
               <TabsContent value="contato">

@@ -20,6 +20,7 @@ import AdminAgendaController from '#controllers/admin_agenda_controller'
 import AdminDashboardController from '#controllers/admin_dashboard_controller'
 import AdminSlotsController from '#controllers/admin_slots_controller'
 import AdminWhatsappController from '#controllers/admin_whatsapp_controller'
+import PortfolioController from '#controllers/portfolio_controller'
 
 router.get('/', () => {
   return { hello: 'world' }
@@ -59,6 +60,8 @@ router
 
 // Perfil — público
 router.get('/api/public/:slug/perfil', [ProfileController, 'publicShow'])
+router.get('/api/public/:slug/portfolio', [PortfolioController, 'publicIndex'])
+router.get('/api/public/portfolio/:id/imagem', [PortfolioController, 'image'])
 
 // Perfil — admin
 router
@@ -68,6 +71,10 @@ router
 router
   .put('/api/admin/:slug/perfil', [ProfileController, 'update'])
   .use(middleware.jwtAuth())
+
+router.get('/api/admin/:slug/portfolio', [PortfolioController, 'index']).use(middleware.jwtAuth())
+router.post('/api/admin/:slug/portfolio', [PortfolioController, 'store']).use(middleware.jwtAuth())
+router.delete('/api/admin/:slug/portfolio/:id', [PortfolioController, 'destroy']).use(middleware.jwtAuth())
 
 // Serviços — público
 router.get('/api/public/:slug/servicos', [ServicosController, 'publicIndex'])

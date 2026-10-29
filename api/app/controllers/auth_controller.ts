@@ -2,12 +2,22 @@ import AuthRefreshToken from '#models/auth_refresh_token'
 import AuthSession from '#models/auth_session'
 import User from '#models/user'
 import JwtService from '#services/jwt_service'
+import LoginThrottleService from '#services/login_throttle_service'
 import RefreshTokenService from '#services/refresh_token_service'
 import hash from '@adonisjs/core/services/hash'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
 import { changePasswordValidator, loginValidator } from '#validators/auth'
+
+let dummyPasswordHash: string | null = null
+
+async function consumeUnknownPasswordTime(password: string) {
+  if (!dummyPasswordHash) {
+    dummyPasswordHash = await hash.make('agendaly-login-throttle')
+  }
+  await hash.verify(dummyPasswordHash, password)
+}
 
 export default class AuthController {
   private setRefreshCookie(response: HttpContext['response'], token: string) {
@@ -20,18 +30,37 @@ export default class AuthController {
     })
   }
 
+  private blockedLogin(response: HttpContext['response'], retryAfterSeconds: number) {
+    response.header('Retry-After', String(retryAfterSeconds))
+    return response.tooManyRequests({
+      message: 'Muitas tentativas de login. O acesso foi bloqueado temporariamente.',
+      retry_after_seconds: retryAfterSeconds,
+    })
+  }
+
   async login({ request, response }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
+    const subject = LoginThrottleService.subject(request.ip(), email)
+
+    const current = await LoginThrottleService.check(subject)
+    if (current.blocked) {
+      return this.blockedLogin(response, current.retryAfterSeconds)
+    }
 
     const user = (await (User as any).query().where('email', email).first()) as User | null
-    if (!user) {
+    const passwordOk = user
+      ? await hash.verify(user.passwordHash, password)
+      : await consumeUnknownPasswordTime(password).then(() => false)
+
+    if (!user || !passwordOk) {
+      const after = await LoginThrottleService.registerFailure(subject)
+      if (after.blocked) {
+        return this.blockedLogin(response, after.retryAfterSeconds)
+      }
       return response.unauthorized({ message: 'Credenciais inválidas' })
     }
 
-    const ok = await hash.verify(user.passwordHash, password)
-    if (!ok) {
-      return response.unauthorized({ message: 'Credenciais inválidas' })
-    }
+    await LoginThrottleService.clear(subject)
 
     const sessionId = crypto.randomUUID()
     const now = DateTime.utc()

@@ -4,7 +4,8 @@ import { z } from "zod"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
-import { Check, CalendarHeart, UserCircle, Eye, EyeOff } from "lucide-react"
+import { isAxiosError } from "axios"
+import { Check, CalendarHeart, UserCircle, Eye, EyeOff, ShieldAlert } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,10 +25,17 @@ const features = [
   "Gestão de serviços e disponibilidade",
 ]
 
+function lockoutMessage(seconds: number) {
+  const minutes = Math.max(1, Math.ceil(seconds / 60))
+  const unidade = minutes === 1 ? "minuto" : "minutos"
+  return `Muitas tentativas de login foram identificadas. Por segurança, novas tentativas com este e-mail foram bloqueadas. Aguarde cerca de ${minutes} ${unidade} e tente novamente.`
+}
+
 export function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [lockMessage, setLockMessage] = useState<string | null>(null)
 
   const {
     register,
@@ -45,7 +53,13 @@ export function LoginPage() {
         navigate(`/admin/${user.slug}/dashboard`)
       }
     },
-    onError: () => {
+    onError: (err) => {
+      if (isAxiosError(err) && err.response?.status === 429) {
+        const seconds = Number(err.response.data?.retry_after_seconds ?? 0)
+        setLockMessage(lockoutMessage(Number.isFinite(seconds) ? seconds : 0))
+        return
+      }
+      setLockMessage(null)
       toast.error("Credenciais inválidas.", { description: "Verifique seu e-mail e senha e tente novamente." })
     },
   })
@@ -151,10 +165,23 @@ export function LoginPage() {
               )}
             </div>
 
+            {lockMessage && (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-3 text-sm text-destructive"
+              >
+                <p className="flex items-center gap-2 font-semibold">
+                  <ShieldAlert className="h-4 w-4 shrink-0" />
+                  Acesso temporariamente bloqueado
+                </p>
+                <p className="mt-1 leading-relaxed">{lockMessage}</p>
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full mt-2 rounded-full"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || !!lockMessage}
             >
               {mutation.isPending ? "Entrando..." : "Entrar no painel"}
             </Button>

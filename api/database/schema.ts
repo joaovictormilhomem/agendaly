@@ -202,6 +202,23 @@ export class DisponibilidadeSchema extends BaseModel {
   declare userId: string
 }
 
+export class LoginThrottleSchema extends BaseModel {
+  static $columns = ['createdAt', 'failures', 'id', 'lockedUntil', 'subject', 'updatedAt'] as const
+  $columns = LoginThrottleSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare failures: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare lockedUntil: DateTime | null
+  @column()
+  declare subject: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class ServicoIncrementoSchema extends BaseModel {
   static $columns = ['createdAt', 'duracaoMinutos', 'id', 'nome', 'obrigatorio', 'ordem', 'preco', 'servicoId', 'updatedAt'] as const
   $columns = ServicoIncrementoSchema.$columns

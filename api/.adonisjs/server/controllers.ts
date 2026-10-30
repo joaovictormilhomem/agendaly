@@ -10,6 +10,7 @@ export const controllers = {
   AdminWhatsapp: () => import('#controllers/admin_whatsapp_controller'),
   Auth: () => import('#controllers/auth_controller'),
   Disponibilidade: () => import('#controllers/disponibilidade_controller'),
+  Portfolio: () => import('#controllers/portfolio_controller'),
   Profile: () => import('#controllers/profile_controller'),
   PublicBookings: () => import('#controllers/public_bookings_controller'),
   PublicSlots: () => import('#controllers/public_slots_controller'),

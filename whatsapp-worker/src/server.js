@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import express from 'express'
 import QRCode from 'qrcode'
 import wweb from 'whatsapp-web.js'
@@ -113,6 +115,37 @@ async function startSession(userId) {
   return entry
 }
 
+const AUTH_DIR = path.resolve('./.wwebjs_auth')
+const SESSION_PREFIX = 'session-agendaly-'
+const USER_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Religa sessões cujo login já está em disco. O processo novo começa sem
+ * clientes na memória; o LocalAuth evita pedir QR de novo quando a sessão vale.
+ */
+async function restoreSavedSessions() {
+  let names = []
+  try {
+    names = await fs.readdir(AUTH_DIR)
+  } catch {
+    return
+  }
+
+  const userIds = names
+    .filter((name) => name.startsWith(SESSION_PREFIX))
+    .map((name) => name.slice(SESSION_PREFIX.length))
+    .filter((id) => USER_ID_RE.test(id))
+
+  for (const userId of userIds) {
+    try {
+      await startSession(userId)
+      console.log(`restaurando sessão salva ${userId}`)
+    } catch (err) {
+      console.error(`falha ao restaurar sessão ${userId}`, err)
+    }
+  }
+}
+
 const app = express()
 app.use(express.json())
 
@@ -188,10 +221,10 @@ function buildChatIdOrder(d, extra) {
   const add = (id) => {
     if (id && !order.includes(id)) order.push(id)
   }
-  // Primeiro o formato clássico PN (o patch de LID no getChat atua aqui).
+  // O id resolvido pelo WhatsApp (LID) vem antes do formato clássico.
+  for (const id of extra) add(id)
   add(`${d}@c.us`)
   add(`${d}@s.whatsapp.net`)
-  for (const id of extra) add(id)
   return order
 }
 
@@ -227,8 +260,17 @@ async function sendWithBestChatId(client, digits, message) {
     const chatIds = buildChatIdOrder(cand, extra)
 
     for (const chatId of chatIds) {
-      const sent = await client.sendMessage(chatId, message)
-      if (sent) return { sent, chat_id: chatId, digits_used: cand }
+      try {
+        const sent = await client.sendMessage(chatId, message)
+        if (sent) return { sent, chat_id: chatId, digits_used: cand }
+        // Número confirmado no WhatsApp e o envio não lançou erro: a mensagem
+        // saiu, mas a biblioteca não devolveu o modelo (LID). Não tenta outro id.
+        if (extra.includes(chatId)) {
+          return { sent: null, chat_id: chatId, digits_used: cand }
+        }
+      } catch {
+        /* este chatId falhou; tenta o próximo */
+      }
     }
   }
   return null
@@ -249,8 +291,28 @@ app.post('/send', async (req, res) => {
     return res.status(503).json({ message: 'WhatsApp não está pronto para envio' })
   }
 
+  const SEND_TIMEOUT_MS = 15_000
+  let timer
+  const timeout = new Promise((resolve) => {
+    timer = setTimeout(() => resolve({ kind: 'timeout' }), SEND_TIMEOUT_MS)
+  })
+  const pending = sendWithBestChatId(entry.client, digits, message)
+    .then((value) => ({ kind: 'done', value }))
+    .catch((err) => ({ kind: 'error', err }))
+
   try {
-    const result = await sendWithBestChatId(entry.client, digits, message)
+    const outcome = await Promise.race([pending, timeout])
+    clearTimeout(timer)
+
+    if (outcome.kind === 'timeout') {
+      return res.status(504).json({ message: 'Tempo esgotado ao enviar a mensagem' })
+    }
+    if (outcome.kind === 'error') {
+      const err = outcome.err
+      return res.status(500).json({ message: err instanceof Error ? err.message : 'send_fail' })
+    }
+
+    const result = outcome.value
     if (!result) {
       return res.status(502).json({
         message:
@@ -272,4 +334,5 @@ app.post('/send', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`whatsapp-worker ouvindo em :${PORT}`)
+  void restoreSavedSessions()
 })

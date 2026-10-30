@@ -1,4 +1,5 @@
 import User from '#models/user'
+import WhatsappMensagem from '#models/whatsapp_mensagem'
 import WhatsappBridgeService from '#services/whatsapp_bridge_service'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -93,5 +94,51 @@ export default class AdminWhatsappController {
         message: e instanceof Error ? e.message : 'Falha ao desconectar',
       })
     }
+  }
+
+  /**
+   * GET /api/admin/:slug/whatsapp/mensagens
+   */
+  async mensagens({ params, authJwt, request, response }: HttpContext) {
+    const user = await findUserAndAuthorize(params.slug, authJwt, response)
+    if (!user) return
+
+    const pageRaw = Number(request.input('page', 1))
+    const perPageRaw = Number(request.input('per_page', 20))
+    const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1
+    const perPage = Number.isFinite(perPageRaw)
+      ? Math.min(50, Math.max(1, Math.floor(perPageRaw)))
+      : 20
+
+    const paginator = await WhatsappMensagem.query()
+      .where('user_id', user.id)
+      .preload('agendamento')
+      .orderBy('created_at', 'desc')
+      .paginate(page, perPage)
+
+    const meta = paginator.getMeta()
+
+    return response.ok({
+      mensagens: paginator.all().map((mensagem) => ({
+        id: mensagem.id,
+        agendamento_id: mensagem.agendamentoId,
+        cliente_nome: mensagem.agendamento?.clienteNome ?? '',
+        contexto: mensagem.contexto,
+        destinatario: mensagem.destinatario,
+        corpo: mensagem.corpo,
+        status: mensagem.status,
+        erro: mensagem.erro,
+        chat_id: mensagem.chatId,
+        message_id: mensagem.messageId,
+        created_at: mensagem.createdAt.toISO(),
+        updated_at: mensagem.updatedAt?.toISO() ?? null,
+      })),
+      meta: {
+        total: meta.total,
+        page: meta.currentPage,
+        per_page: meta.perPage,
+        last_page: meta.lastPage,
+      },
+    })
   }
 }

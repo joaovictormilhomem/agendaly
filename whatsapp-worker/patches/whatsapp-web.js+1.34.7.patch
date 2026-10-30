@@ -2,7 +2,25 @@ diff --git a/node_modules/whatsapp-web.js/src/util/Injected/Utils.js b/node_modu
 index 540078a..ca42fe9 100644
 --- a/node_modules/whatsapp-web.js/src/util/Injected/Utils.js
 +++ b/node_modules/whatsapp-web.js/src/util/Injected/Utils.js
-@@ -861,13 +861,51 @@ exports.LoadUtils = () => {
+@@ -579,7 +579,8 @@ exports.LoadUtils = () => {
+          const [msgPromise, sendMsgResultPromise] = window
+              .require('WAWebSendMsgChatAction')
+              .addAndSendMsgToChat(chat, message);
+-        await msgPromise;
++        const sentMsg = await msgPromise;
+  
+          if (options.waitUntilMsgSent) await sendMsgResultPromise;
+  
+-        return window
+-            .require('WAWebCollections')
+-            .Msg.get(newMsgKey._serialized);
++        return (
++            window.require('WAWebCollections').Msg.get(newMsgKey._serialized) ||
++            sentMsg
++        );
+      };
+ 
+@@ -861,13 +862,51 @@ exports.LoadUtils = () => {
                  chat = null;
              }
          } else {

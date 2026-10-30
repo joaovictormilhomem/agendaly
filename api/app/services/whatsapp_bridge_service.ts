@@ -1,10 +1,20 @@
 import env from '#start/env'
 import logger from '@adonisjs/core/services/logger'
 
+const BRIDGE_TIMEOUT_MS = 15_000
+
 type SessionStateResponse = {
   state: string
   qr_data_url: string | null
   error: string | null
+}
+
+export type WhatsappSendResult = {
+  ok: boolean
+  erro: string | null
+  chatId: string | null
+  messageId: string | null
+  statusHttp: number | null
 }
 
 export default class WhatsappBridgeService {
@@ -34,6 +44,7 @@ export default class WhatsappBridgeService {
     try {
       const res = await fetch(`${this.baseUrl}/sessions/${encodeURIComponent(userId)}`, {
         headers: this.authHeaders(),
+        signal: AbortSignal.timeout(BRIDGE_TIMEOUT_MS),
       })
       if (!res.ok) {
         logger.warn({ status: res.status, userId }, '[whatsapp-bridge] status http erro')
@@ -42,7 +53,11 @@ export default class WhatsappBridgeService {
       return (await res.json()) as SessionStateResponse
     } catch (e) {
       logger.warn({ err: e, userId }, '[whatsapp-bridge] status falhou')
-      return { state: 'error', qr_data_url: null, error: 'network' }
+      return {
+        state: 'error',
+        qr_data_url: null,
+        error: e instanceof Error && e.name === 'TimeoutError' ? 'timeout' : 'network',
+      }
     }
   }
 
@@ -71,23 +86,63 @@ export default class WhatsappBridgeService {
     }
   }
 
-  async sendText(userId: string, toDigits: string, message: string): Promise<boolean> {
-    if (!this.isEnabled()) return false
+  async sendText(userId: string, toDigits: string, message: string): Promise<WhatsappSendResult> {
+    if (!this.isEnabled()) {
+      return { ok: false, erro: 'WhatsApp não está configurado no servidor', chatId: null, messageId: null, statusHttp: null }
+    }
     try {
       const res = await fetch(`${this.baseUrl}/send`, {
         method: 'POST',
         headers: this.authHeaders(),
         body: JSON.stringify({ userId, to: toDigits, message }),
+        signal: AbortSignal.timeout(BRIDGE_TIMEOUT_MS),
       })
+      const body = await res.text()
       if (!res.ok) {
-        const body = await res.text()
+        const erro = mensagemDeErro(res.status, body)
         logger.warn({ status: res.status, body, userId }, '[whatsapp-bridge] send falhou')
-        return false
+        return { ok: false, erro, chatId: null, messageId: null, statusHttp: res.status }
       }
-      return true
+      const parsed = parseJson(body)
+      return {
+        ok: true,
+        erro: null,
+        chatId: textoOuNull(parsed?.chat_id),
+        messageId: textoOuNull(parsed?.message_id),
+        statusHttp: res.status,
+      }
     } catch (e) {
       logger.warn({ err: e, userId }, '[whatsapp-bridge] send exceção')
-      return false
+      const timeout = e instanceof Error && e.name === 'TimeoutError'
+      return {
+        ok: false,
+        erro: timeout ? 'Tempo esgotado ao contactar o WhatsApp' : 'Falha de rede ao contactar o WhatsApp',
+        chatId: null,
+        messageId: null,
+        statusHttp: null,
+      }
     }
   }
+}
+
+function parseJson(body: string): { chat_id?: unknown; message_id?: unknown; message?: unknown } | null {
+  try {
+    return JSON.parse(body) as { chat_id?: unknown; message_id?: unknown; message?: unknown }
+  } catch {
+    return null
+  }
+}
+
+function textoOuNull(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() !== '' ? value : null
+}
+
+function mensagemDeErro(status: number, body: string): string {
+  const parsed = parseJson(body)
+  if (typeof parsed?.message === 'string' && parsed.message.trim()) {
+    return parsed.message.trim().slice(0, 1000)
+  }
+  const texto = body.trim()
+  if (texto) return texto.slice(0, 1000)
+  return `Falha no envio (HTTP ${status})`
 }

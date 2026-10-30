@@ -147,3 +147,7 @@ router
 router
   .post('/api/admin/:slug/whatsapp/desconectar', [AdminWhatsappController, 'desconectar'])
   .use(middleware.jwtAuth())
+
+router
+  .get('/api/admin/:slug/whatsapp/mensagens', [AdminWhatsappController, 'mensagens'])
+  .use(middleware.jwtAuth())

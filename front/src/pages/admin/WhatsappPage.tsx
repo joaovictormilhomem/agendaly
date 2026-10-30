@@ -1,18 +1,59 @@
+import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 import { toast } from "sonner"
 import { RefreshCw } from "lucide-react"
 
 import {
+  getWhatsappMensagens,
   getWhatsappStatus,
   postWhatsappConectar,
   postWhatsappDesconectar,
 } from "@/api/admin/whatsapp"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
+import type { WhatsappMensagem, WhatsappMensagemContexto, WhatsappMensagemStatus } from "@/types/whatsapp"
 
 const POLL_MS = 2500
+
+const contextoLabel: Record<WhatsappMensagemContexto, string> = {
+  agendamento_criado: "Pedido recebido",
+  confirmado_admin: "Confirmação",
+  cancelado: "Cancelamento",
+}
+
+const statusLabel: Record<WhatsappMensagemStatus, { label: string; className: string }> = {
+  pendente: {
+    label: "Pendente",
+    className: "border-transparent text-[#92650A] bg-[#FEF3C7] hover:bg-[#FEF3C7]",
+  },
+  enviado: {
+    label: "Enviado",
+    className: "border-transparent text-[#519670] bg-[#E8F5EE] hover:bg-[#E8F5EE]",
+  },
+  falhou: {
+    label: "Falhou",
+    className: "border-transparent text-[#B91C1C] bg-[#FEE2E2] hover:bg-[#FEE2E2]",
+  },
+}
+
+function formatarQuando(iso: string) {
+  const data = new Date(iso)
+  if (Number.isNaN(data.getTime())) return iso
+  return format(data, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+}
 
 function labelEstado(state: string): string {
   switch (state) {
@@ -37,6 +78,8 @@ function labelEstado(state: string): string {
 export function WhatsappPage() {
   const { slug } = useParams<{ slug: string }>()
   const queryClient = useQueryClient()
+  const [page, setPage] = useState(1)
+  const [aberta, setAberta] = useState<WhatsappMensagem | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ["whatsapp-status", slug],
@@ -47,6 +90,16 @@ export function WhatsappPage() {
       if (s === "qr" || s === "starting" || s === "authenticating") return POLL_MS
       return false
     },
+  })
+
+  useEffect(() => {
+    setPage(1)
+  }, [slug])
+
+  const mensagensQuery = useQuery({
+    queryKey: ["whatsapp-mensagens", slug, page],
+    queryFn: () => getWhatsappMensagens(slug!, page),
+    enabled: Boolean(slug),
   })
 
   const conectar = useMutation({
@@ -73,8 +126,11 @@ export function WhatsappPage() {
 
   if (!slug) return null
 
+  const mensagens = mensagensQuery.data?.mensagens ?? []
+  const lastPage = mensagensQuery.data?.meta.last_page ?? 1
+
   return (
-    <div className="max-w-xl space-y-6">
+    <div className="max-w-3xl space-y-8">
       <p className="text-muted-foreground text-sm">
         Conecte o WhatsApp da profissional para enviar confirmações e avisos de cancelamento aos
         clientes automaticamente.
@@ -155,6 +211,104 @@ export function WhatsappPage() {
           )}
         </CardContent>
       </Card>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl font-semibold font-playfair text-foreground">Mensagens</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Tentativas de envio desta conta, da mais recente para a mais antiga.
+          </p>
+        </div>
+
+        {mensagensQuery.isLoading && (
+          <div className="space-y-3">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        )}
+
+        {mensagensQuery.isError && (
+          <p className="text-sm text-destructive">Não foi possível carregar as mensagens.</p>
+        )}
+
+        {!mensagensQuery.isLoading && !mensagensQuery.isError && mensagens.length === 0 && (
+          <p className="text-sm text-muted-foreground">Nenhuma tentativa de mensagem ainda.</p>
+        )}
+
+        {!mensagensQuery.isLoading && !mensagensQuery.isError && mensagens.length > 0 && (
+          <div className="divide-y divide-border rounded-xl border border-border bg-card">
+            {mensagens.map((item) => {
+              const status = statusLabel[item.status]
+              return (
+                <div key={item.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground">
+                        {item.cliente_nome || "Cliente"}
+                      </p>
+                      <Badge variant="outline" className={cn(status.className, "text-[10px] font-semibold")}>
+                        {status.label}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {contextoLabel[item.contexto] ?? item.contexto} · {item.destinatario} ·{" "}
+                      {formatarQuando(item.created_at)}
+                    </p>
+                    {item.status !== "enviado" && item.erro && (
+                      <p className="text-xs text-destructive">{item.erro}</p>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full text-xs h-7 shrink-0"
+                    onClick={() => setAberta(item)}
+                  >
+                    Ver mensagem
+                  </Button>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {!mensagensQuery.isLoading && !mensagensQuery.isError && lastPage > 1 && (
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((atual) => Math.max(1, atual - 1))}
+            >
+              Anterior
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Página {page} de {lastPage}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= lastPage}
+              onClick={() => setPage((atual) => atual + 1)}
+            >
+              Próxima
+            </Button>
+          </div>
+        )}
+      </section>
+
+      <Dialog open={Boolean(aberta)} onOpenChange={(open) => !open && setAberta(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-playfair">{aberta?.cliente_nome || "Mensagem"}</DialogTitle>
+            <DialogDescription>
+              {aberta ? `${contextoLabel[aberta.contexto] ?? aberta.contexto} · ${aberta.destinatario}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <p className="whitespace-pre-wrap text-sm text-foreground">{aberta?.corpo}</p>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

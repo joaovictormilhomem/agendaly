@@ -37,7 +37,7 @@ export default class AdminSlotsController {
       .where('id', servicoId)
       .where('user_id', user.id)
       .where('ativo', true)
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .first()
 
     if (!servico) return response.notFound({ message: 'Serviço não encontrado' })
@@ -45,7 +45,8 @@ export default class AdminSlotsController {
     const resolved = resolverTotaisServico(
       servico,
       servico.incrementos ?? [],
-      parseIncrementoIds(request.input('incremento_ids'))
+      parseIncrementoIds(request.input('incremento_ids')),
+      parseIncrementoIds(request.input('incremento_adicional_ids'))
     )
     if (!resolved.ok) {
       return response.unprocessableEntity({ message: resolved.message })

@@ -21,6 +21,9 @@ const dbConfig = defineConfig({
         // `pg` exige string; variáveis opcionais no env podem vir como undefined.
         password: env.get('DB_PASSWORD') ?? '',
         database: env.get('DB_DATABASE', 'agendaly'),
+        // Neon exige TLS. Em produção, habilitamos SSL por padrão para evitar
+        // conexões inseguras quando a variável do provedor não é carregada.
+        ssl: env.get('DB_SSL') || app.inProduction ? { rejectUnauthorized: false } : undefined,
       },
       migrations: {
         naturalSort: true,

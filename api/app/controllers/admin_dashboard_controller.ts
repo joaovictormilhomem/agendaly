@@ -59,14 +59,14 @@ export default class AdminDashboardController {
       .where('status', 'CONFIRMADO')
       .where('data_hora_inicio', '>=', m0)
       .preload('servico')
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
 
     const agendaRows = await Agendamento.query()
       .where('user_id', user.id)
       .where('data_hora_inicio', '>=', t0)
       .where('data_hora_inicio', '<=', t1)
       .preload('servico')
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .orderBy('data_hora_inicio', 'asc')
 
     const futuros = await Agendamento.query()
@@ -74,7 +74,7 @@ export default class AdminDashboardController {
       .whereNot('status', 'CANCELADO')
       .where('data_hora_inicio', '>', utcNow)
       .preload('servico')
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .orderBy('data_hora_inicio', 'asc')
       .limit(20)
 
@@ -93,7 +93,7 @@ export default class AdminDashboardController {
     const receita = confirmadosMes.reduce((s, a) => {
       const incs = a.incrementos ?? []
       if (incs.length > 0) {
-        return s + incs.reduce((sum, i) => sum + Number(i.preco), 0)
+        return s + incs.reduce((sum, i) => sum + Number(i.preco) + (i.adicionais ?? []).reduce((subtotal, adicional) => subtotal + Number(adicional.preco), 0), 0)
       }
       return s + Number(a.servico.preco)
     }, 0)

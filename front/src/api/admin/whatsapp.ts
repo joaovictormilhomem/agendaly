@@ -1,4 +1,5 @@
 import { apiClient } from "@/api/client"
+import type { WhatsappMensagensResponse } from "@/types/whatsapp"
 
 export type WhatsappSessionPayload = {
   state: string
@@ -22,4 +23,11 @@ export async function postWhatsappConectar(slug: string): Promise<WhatsappSessio
 
 export async function postWhatsappDesconectar(slug: string): Promise<void> {
   await apiClient.post(`/api/admin/${slug}/whatsapp/desconectar`)
+}
+
+export async function getWhatsappMensagens(slug: string, page = 1): Promise<WhatsappMensagensResponse> {
+  const { data } = await apiClient.get<WhatsappMensagensResponse>(`/api/admin/${slug}/whatsapp/mensagens`, {
+    params: { page, per_page: 20 },
+  })
+  return data
 }

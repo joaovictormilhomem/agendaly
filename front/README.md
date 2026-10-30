@@ -17,14 +17,14 @@ npm install
 
 ## Variáveis de ambiente
 
-O projeto já inclui `.env` e `.env.development` com valores locais. Para sobrescrever, crie `.env.local` (ignorado pelo git se configurado) ou edite `.env.development`.
+O projeto já inclui `.env` e `.env.development` com valores locais. Para sobrescrever, crie `.env` (ignorado pelo git se configurado) ou edite `.env.development`.
 
 | Variável | Descrição | Padrão no repo |
 |----------|-----------|----------------|
 | `VITE_API_BASE_URL` | URL base da API | `http://localhost:3333` |
 | `VITE_USE_MOCKS` | MSW mocka requisições | `false` |
 
-Se `VITE_API_BASE_URL` não estiver definida, o cliente HTTP usa fallback `http://localhost:3000` em `src/api/client.ts` — mantenha o `.env` para evitar isso.
+Se `VITE_API_BASE_URL` não estiver definida, o cliente HTTP usa fallback `http://localhost:3000` em `src/api/client.ts`.
 
 ### Proxy no Vite
 

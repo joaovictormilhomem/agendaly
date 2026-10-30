@@ -1,6 +1,7 @@
 import Agendamento from '#models/agendamento'
 import AgendamentoCancelamento from '#models/agendamento_cancelamento'
 import AgendamentoIncremento from '#models/agendamento_incremento'
+import AgendamentoAdicional from '#models/agendamento_adicional'
 import Disponibilidade from '#models/disponibilidade'
 import Servico from '#models/servico'
 import User from '#models/user'
@@ -82,7 +83,7 @@ export default class AdminAgendaController {
       .where('data_hora_inicio', '<', endUtc.toISO()!)
       .where('data_hora_fim', '>', startUtc.toISO()!)
       .preload('servico')
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .orderBy('data_hora_inicio', 'asc')
 
     return response.ok({
@@ -102,7 +103,7 @@ export default class AdminAgendaController {
       .where('id', params.id)
       .where('user_id', user.id)
       .preload('servico')
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .first()
 
     if (!ag) return response.notFound({ message: 'Agendamento não encontrado' })
@@ -126,7 +127,7 @@ export default class AdminAgendaController {
       .where('id', body.servicoId)
       .where('user_id', user.id)
       .where('ativo', true)
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .first()
 
     if (!servico) return response.notFound({ message: 'Serviço não encontrado' })
@@ -134,7 +135,8 @@ export default class AdminAgendaController {
     const resolved = resolverTotaisServico(
       servico,
       servico.incrementos ?? [],
-      body.incremento_ids
+      body.incremento_ids,
+      body.incremento_adicional_ids
     )
     if (!resolved.ok) {
       return response.unprocessableEntity({ message: resolved.message })
@@ -186,7 +188,7 @@ export default class AdminAgendaController {
     })
 
     for (const inc of totais.incrementos) {
-      await AgendamentoIncremento.create({
+      const registro = await AgendamentoIncremento.create({
         id: crypto.randomUUID(),
         agendamentoId: ag.id,
         servicoIncrementoId: inc.id,
@@ -194,10 +196,20 @@ export default class AdminAgendaController {
         duracaoMinutos: inc.duracao_minutos,
         preco: inc.preco,
       })
+      for (const adicional of inc.adicionais) {
+        await AgendamentoAdicional.create({
+          id: crypto.randomUUID(),
+          agendamentoIncrementoId: registro.id,
+          servicoIncrementoAdicionalId: adicional.id,
+          nome: adicional.nome,
+          duracaoMinutos: adicional.duracao_minutos,
+          preco: adicional.preco,
+        })
+      }
     }
 
     await ag.load('servico')
-    await ag.load('incrementos')
+    await ag.load('incrementos', (q) => q.preload('adicionais'))
     invalidateSlotCacheForUser(user.id)
     await notificacao.agendamentoCriado(ag, 'manual_admin')
 
@@ -231,7 +243,7 @@ export default class AdminAgendaController {
       })
       invalidateSlotCacheForUser(user.id)
       await ag.load('servico')
-      await ag.load('incrementos')
+      await ag.load('incrementos', (q) => q.preload('adicionais'))
       await notificacao.agendamentoCancelado(ag, body.motivo ?? null)
       return response.ok(serializeAgendamentoListItem(ag))
     }
@@ -242,7 +254,7 @@ export default class AdminAgendaController {
       }
       if (ag.status === 'CONFIRMADO') {
         await ag.load('servico')
-        await ag.load('incrementos')
+        await ag.load('incrementos', (q) => q.preload('adicionais'))
         return response.ok(serializeAgendamentoListItem(ag))
       }
       ag.status = 'CONFIRMADO'
@@ -250,7 +262,7 @@ export default class AdminAgendaController {
       await ag.save()
       invalidateSlotCacheForUser(user.id)
       await ag.load('servico')
-      await ag.load('incrementos')
+      await ag.load('incrementos', (q) => q.preload('adicionais'))
       await notificacao.agendamentoConfirmadoPeloAdmin(ag)
       return response.ok(serializeAgendamentoListItem(ag))
     }

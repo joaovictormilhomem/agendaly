@@ -44,6 +44,7 @@ export const router = createBrowserRouter([
           { path: "servicos", element: <ServicosPage /> },
           { path: "disponibilidade", element: <DisponibilidadePage /> },
           { path: "whatsapp", element: <WhatsappPage /> },
+          { path: "mensagens", element: <Navigate to="../whatsapp" replace /> },
           { path: "personalizar", element: <PersonalizarPage /> },
         ],
       },

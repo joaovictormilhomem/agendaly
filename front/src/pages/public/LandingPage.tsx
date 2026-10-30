@@ -10,6 +10,8 @@ import { HeroSection } from "@/components/landing/HeroSection"
 import { ServicosSection } from "@/components/landing/ServicosSection"
 import { BannerSection } from "@/components/landing/BannerSection"
 import { ContatoFooter } from "@/components/landing/ContatoFooter"
+import { PortfolioSection } from "@/components/landing/PortfolioSection"
+import { getPortfolioPublico } from "@/api/public/portfolio"
 
 function LandingPageSkeleton() {
   return (
@@ -35,6 +37,12 @@ export function LandingPage() {
     enabled: !!slug,
   })
 
+  const { data: portfolio = [] } = useQuery({
+    queryKey: ["portfolio-pub", slug],
+    queryFn: () => getPortfolioPublico(slug!),
+    enabled: !!slug,
+  })
+
   if (isLoading || !perfil) return <LandingPageSkeleton />
 
   const activeServicos = (servicos ?? []).filter((s) => s.ativo)
@@ -51,6 +59,7 @@ export function LandingPage() {
       <LandingNavbar perfil={perfil} slug={slug!} />
       <HeroSection perfil={perfil} slug={slug!} />
       <ServicosSection servicos={activeServicos} slug={slug!} />
+      <PortfolioSection imagens={portfolio} />
       <BannerSection perfil={perfil} slug={slug!} />
       <ContatoFooter perfil={perfil} />
     </div>

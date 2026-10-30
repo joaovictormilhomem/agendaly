@@ -54,6 +54,7 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
   const [selectedDate, setSelectedDate] = useState<Date>(initialDate ?? new Date())
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const [incrementoIds, setIncrementoIds] = useState<string[]>([])
+  const [incrementoAdicionalIds, setIncrementoAdicionalIds] = useState<string[]>([])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -79,7 +80,7 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
   const incrementosOk =
     !temIncrementos ||
     (servicoSelecionado
-      ? totaisServico(servicoSelecionado, incrementoIds).incrementos.length > 0
+      ? totaisServico(servicoSelecionado, incrementoIds, incrementoAdicionalIds).incrementos.length > 0
       : false)
 
   const { data: slots = [] } = useQuery({
@@ -89,8 +90,9 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
       format(selectedDate, "yyyy-MM-dd"),
       servicoId,
       [...incrementoIds].sort().join(","),
+      [...incrementoAdicionalIds].sort().join(","),
     ],
-    queryFn: () => getAdminSlots(slug, selectedDate, servicoId, incrementoIds),
+    queryFn: () => getAdminSlots(slug, selectedDate, servicoId, incrementoIds, incrementoAdicionalIds),
     enabled: open && !!servicoId && incrementosOk,
   })
 
@@ -103,6 +105,8 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
         cliente_whatsapp: values.cliente_whatsapp.replace(/\D/g, "").slice(0, 20),
         servicoId: values.servicoId,
         incremento_ids: incrementoIds.length > 0 ? incrementoIds : undefined,
+        incremento_adicional_ids:
+          incrementoAdicionalIds.length > 0 ? incrementoAdicionalIds : undefined,
         data_hora_inicio: combineDateAndTimeToIso(selectedDate, selectedSlot),
         notas_internas: values.notas_internas.trim() || undefined,
       })
@@ -126,19 +130,22 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
       setSelectedDate(initialDate ?? new Date())
       setSelectedSlot(null)
       setIncrementoIds([])
+      setIncrementoAdicionalIds([])
     }
   }, [open, initialDate, form])
 
   useEffect(() => {
     setSelectedSlot(null)
-  }, [selectedDate, servicoId, incrementoIds])
+  }, [selectedDate, servicoId, incrementoIds, incrementoAdicionalIds])
 
   useEffect(() => {
     if (!servicoSelecionado) {
       setIncrementoIds([])
+      setIncrementoAdicionalIds([])
       return
     }
     setIncrementoIds(idsObrigatorios(servicoSelecionado))
+    setIncrementoAdicionalIds([])
   }, [servicoId])
 
   const handleSubmit = (values: FormValues) => {
@@ -155,7 +162,7 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[480px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-playfair">Novo agendamento</DialogTitle>
         </DialogHeader>
@@ -243,15 +250,22 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
                   {servicoSelecionado.incrementos.map((inc) => {
                     const checked = incrementoIds.includes(inc.id) || inc.obrigatorio
                     return (
+                      <div key={inc.id} className="space-y-1.5">
                       <button
-                        key={inc.id}
                         type="button"
                         disabled={inc.obrigatorio}
                         onClick={() => {
                           if (inc.obrigatorio) return
                           setIncrementoIds((prev) =>
                             prev.includes(inc.id)
-                              ? prev.filter((x) => x !== inc.id)
+                              ? (() => {
+                                  setIncrementoAdicionalIds((adicionais) =>
+                                    adicionais.filter(
+                                      (id) => !(inc.adicionais ?? []).some((adicional) => adicional.id === id)
+                                    )
+                                  )
+                                  return prev.filter((x) => x !== inc.id)
+                                })()
                               : [...prev, inc.id]
                           )
                         }}
@@ -275,8 +289,68 @@ export function NovoAgendamentoDialog({ open, onOpenChange, slug, initialDate }:
                           </span>
                         </span>
                       </button>
+                      {checked && (inc.adicionais?.length ?? 0) > 0 && (
+                        <div className="ml-3 space-y-1.5 border-l border-border pl-3">
+                          <p className="text-xs font-medium text-muted-foreground">Adicionais opcionais</p>
+                          {inc.adicionais!.map((adicional) => {
+                            const adicionalSelecionado = incrementoAdicionalIds.includes(adicional.id)
+                            return (
+                              <button
+                                key={adicional.id}
+                                type="button"
+                                onClick={() => setIncrementoAdicionalIds((prev) => prev.includes(adicional.id) ? prev.filter((id) => id !== adicional.id) : [...prev, adicional.id])}
+                                className={cn("w-full flex items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition-colors", adicionalSelecionado ? "border-primary bg-primary/5" : "border-border hover:bg-accent")}
+                              >
+                                <span><span className="font-medium">{adicional.nome}</span><span className="text-muted-foreground"> · +{adicional.duracao_minutos} min · +{adicional.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span></span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                      </div>
                     )
                   })}
+                  {servicoSelecionado && false && servicoSelecionado!.incrementos
+                    .filter((inc) => incrementoIds.includes(inc.id) || inc.obrigatorio)
+                    .flatMap((inc) =>
+                      (inc.adicionais ?? []).map((adicional) => ({
+                        especificacao: inc.nome,
+                        adicional,
+                      }))
+                    )
+                    .map(({ especificacao, adicional }) => {
+                      const checked = incrementoAdicionalIds.includes(adicional.id)
+                      return (
+                        <button
+                          key={adicional.id}
+                          type="button"
+                          onClick={() =>
+                            setIncrementoAdicionalIds((prev) =>
+                              prev.includes(adicional.id)
+                                ? prev.filter((id) => id !== adicional.id)
+                                : [...prev, adicional.id]
+                            )
+                          }
+                          className={cn(
+                            "ml-3 w-[calc(100%-0.75rem)] flex items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition-colors",
+                            checked
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:bg-accent"
+                          )}
+                        >
+                          <span>
+                            <span className="font-medium">{adicional.nome}</span>
+                            <span className="text-muted-foreground">
+                              {" "}({especificacao}) · +{adicional.duracao_minutos} min · +
+                              {adicional.preco.toLocaleString("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              })}
+                            </span>
+                          </span>
+                        </button>
+                      )
+                    })}
                 </div>
               </div>
             )}

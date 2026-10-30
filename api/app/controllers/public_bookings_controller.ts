@@ -1,5 +1,6 @@
 import Agendamento from '#models/agendamento'
 import AgendamentoIncremento from '#models/agendamento_incremento'
+import AgendamentoAdicional from '#models/agendamento_adicional'
 import BookingAttempt from '#models/booking_attempt'
 import Servico from '#models/servico'
 import User from '#models/user'
@@ -36,7 +37,7 @@ export default class PublicBookingsController {
       .where('id', body.servicoId)
       .where('user_id', user.id)
       .where('ativo', true)
-      .preload('incrementos')
+      .preload('incrementos', (q) => q.preload('adicionais'))
       .first()
 
     if (!servico) return response.notFound({ message: 'Serviço não encontrado' })
@@ -44,7 +45,8 @@ export default class PublicBookingsController {
     const resolved = resolverTotaisServico(
       servico,
       servico.incrementos ?? [],
-      body.incremento_ids
+      body.incremento_ids,
+      body.incremento_adicional_ids
     )
     if (!resolved.ok) {
       return response.unprocessableEntity({ message: resolved.message })
@@ -110,7 +112,7 @@ export default class PublicBookingsController {
         )
 
         for (const inc of totais.incrementos) {
-          await AgendamentoIncremento.create(
+          const registro = await AgendamentoIncremento.create(
             {
               id: crypto.randomUUID(),
               agendamentoId: created.id,
@@ -121,13 +123,23 @@ export default class PublicBookingsController {
             },
             { client: trx }
           )
+          for (const adicional of inc.adicionais) {
+            await AgendamentoAdicional.create({
+              id: crypto.randomUUID(),
+              agendamentoIncrementoId: registro.id,
+              servicoIncrementoAdicionalId: adicional.id,
+              nome: adicional.nome,
+              duracaoMinutos: adicional.duracao_minutos,
+              preco: adicional.preco,
+            }, { client: trx })
+          }
         }
       })
 
       await logAttempt('sucesso')
       invalidateSlotCacheForUser(user.id)
       await created!.load('servico')
-      await created!.load('incrementos')
+      await created!.load('incrementos', (q) => q.preload('adicionais'))
       await notificacao.agendamentoCriado(created!, 'publico')
 
       return response.created({

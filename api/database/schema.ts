@@ -7,6 +7,25 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class AgendamentoAdicionaiSchema extends BaseModel {
+  static $columns = ['agendamentoIncrementoId', 'createdAt', 'duracaoMinutos', 'id', 'nome', 'preco', 'servicoIncrementoAdicionalId'] as const
+  $columns = AgendamentoAdicionaiSchema.$columns
+  @column()
+  declare agendamentoIncrementoId: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare duracaoMinutos: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare nome: string
+  @column()
+  declare preco: string
+  @column()
+  declare servicoIncrementoAdicionalId: string | null
+}
+
 export class AgendamentoCancelamentoSchema extends BaseModel {
   static $columns = ['agendamentoId', 'createdAt', 'id', 'motivo'] as const
   $columns = AgendamentoCancelamentoSchema.$columns
@@ -215,6 +234,46 @@ export class LoginThrottleSchema extends BaseModel {
   declare lockedUntil: DateTime | null
   @column()
   declare subject: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class PortfolioImagenSchema extends BaseModel {
+  static $columns = ['arquivo', 'contentType', 'createdAt', 'id', 'ordem', 'updatedAt', 'userId'] as const
+  $columns = PortfolioImagenSchema.$columns
+  @column()
+  declare arquivo: Buffer
+  @column()
+  declare contentType: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare ordem: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
+}
+
+export class ServicoIncrementoAdicionaiSchema extends BaseModel {
+  static $columns = ['createdAt', 'duracaoMinutos', 'id', 'nome', 'ordem', 'preco', 'servicoIncrementoId', 'updatedAt'] as const
+  $columns = ServicoIncrementoAdicionaiSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare duracaoMinutos: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare nome: string
+  @column()
+  declare ordem: number
+  @column()
+  declare preco: string
+  @column()
+  declare servicoIncrementoId: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }

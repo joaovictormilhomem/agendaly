@@ -244,4 +244,11 @@ export const adminHandlers = [
   http.post("*/api/admin/:slug/whatsapp/desconectar", () => {
     return HttpResponse.json({ ok: true })
   }),
+
+  http.get("*/api/admin/:slug/whatsapp/mensagens", () => {
+    return HttpResponse.json({
+      mensagens: [],
+      meta: { total: 0, page: 1, per_page: 20, last_page: 1 },
+    })
+  }),
 ]

@@ -21,6 +21,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   // App
   APP_KEY: Env.schema.secret(),
   APP_URL: Env.schema.string({ format: 'url', tld: false }),
+  CORS_ORIGIN: Env.schema.string.optional(),
 
   // Database
   DB_CONNECTION: Env.schema.enum(['pg'] as const),
@@ -29,6 +30,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_USER: Env.schema.string.optional(),
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string.optional(),
+  DB_SSL: Env.schema.boolean.optional(),
 
   // Auth (JWT)
   JWT_ACCESS_SECRET: Env.schema.secret(),

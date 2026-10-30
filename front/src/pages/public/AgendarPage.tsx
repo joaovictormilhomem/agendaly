@@ -14,6 +14,7 @@ import type { Servico } from "@/types/servico"
 export interface BookingData {
   service: Servico | null
   incrementoIds: string[]
+  incrementoAdicionalIds: string[]
   date: Date | null
   time: string | null
   clientName: string
@@ -24,6 +25,7 @@ export interface BookingData {
 const INITIAL_STATE: BookingData = {
   service: null,
   incrementoIds: [],
+  incrementoAdicionalIds: [],
   date: null,
   time: null,
   clientName: "",
@@ -50,11 +52,12 @@ export function AgendarPage() {
     setCurrentStep(step)
   }
 
-  const handleServiceSelect = (service: Servico, incrementoIds: string[]) => {
+  const handleServiceSelect = (service: Servico, incrementoIds: string[], incrementoAdicionalIds: string[]) => {
     setBookingData((prev) => ({
       ...prev,
       service,
       incrementoIds,
+      incrementoAdicionalIds,
       date: null,
       time: null,
     }))
@@ -92,6 +95,8 @@ export function AgendarPage() {
         servicoId: bookingData.service.id,
         incremento_ids:
           bookingData.incrementoIds.length > 0 ? bookingData.incrementoIds : undefined,
+        incremento_adicional_ids:
+          bookingData.incrementoAdicionalIds.length > 0 ? bookingData.incrementoAdicionalIds : undefined,
         slot_datetime,
       })
 
@@ -126,6 +131,7 @@ export function AgendarPage() {
               slug={slug}
               service={bookingData.service}
               incrementoIds={bookingData.incrementoIds}
+              incrementoAdicionalIds={bookingData.incrementoAdicionalIds}
               onSelect={handleDateTimeSelect}
             />
           )}

@@ -4,6 +4,9 @@ import { AdminLayout } from "@/layouts/AdminLayout"
 import { MasterLayout } from "@/layouts/MasterLayout"
 import { LoginPage } from "@/pages/auth/LoginPage"
 import { MasterDashboardPage } from "@/pages/master/MasterDashboardPage"
+import { MasterTicketsPage } from "@/pages/master/MasterTicketsPage"
+import { TicketDetailPage } from "@/pages/support/TicketDetailPage"
+import { AjudaPage } from "@/pages/admin/AjudaPage"
 import { DashboardPage } from "@/pages/admin/DashboardPage"
 import { AgendaPage } from "@/pages/admin/AgendaPage"
 import { PersonalizarPage } from "@/pages/admin/PersonalizarPage"
@@ -27,6 +30,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/master/dashboard" replace /> },
           { path: "dashboard", element: <MasterDashboardPage /> },
+          { path: "suporte", element: <MasterTicketsPage /> },
+          { path: "suporte/:id", element: <TicketDetailPage staff /> },
         ],
       },
     ],
@@ -46,6 +51,8 @@ export const router = createBrowserRouter([
           { path: "whatsapp", element: <WhatsappPage /> },
           { path: "mensagens", element: <Navigate to="../whatsapp" replace /> },
           { path: "personalizar", element: <PersonalizarPage /> },
+          { path: "ajuda", element: <AjudaPage /> },
+          { path: "ajuda/:id", element: <TicketDetailPage /> },
         ],
       },
     ],

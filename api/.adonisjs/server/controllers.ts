@@ -16,4 +16,5 @@ export const controllers = {
   PublicSlots: () => import('#controllers/public_slots_controller'),
   Servicos: () => import('#controllers/servicos_controller'),
   Users: () => import('#controllers/users_controller'),
+  SupportTickets: () => import('#controllers/support_tickets_controller'),
 }

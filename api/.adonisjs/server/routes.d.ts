@@ -8,12 +8,25 @@ export type ScannedRoutes = {
     'auth.refresh': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
     'auth.change_password': { paramsTuple?: []; params?: {} }
+    'support_tickets.store': { paramsTuple?: []; params?: {} }
+    'support_tickets.index': { paramsTuple?: []; params?: {} }
+    'support_tickets.mine': { paramsTuple?: []; params?: {} }
+    'support_tickets.unread': { paramsTuple?: []; params?: {} }
+    'support_tickets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'support_tickets.reply': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'support_tickets.mark_read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'support_tickets.update_status': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.index': { paramsTuple?: []; params?: {} }
     'users.impersonate': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
     'profile.public_show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.image': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'profile.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
     'servicos.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public_slots.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public_bookings.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -32,11 +45,19 @@ export type ScannedRoutes = {
     'admin_whatsapp.status': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_whatsapp.conectar': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_whatsapp.desconectar': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.mensagens': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   GET: {
+    'support_tickets.index': { paramsTuple?: []; params?: {} }
+    'support_tickets.mine': { paramsTuple?: []; params?: {} }
+    'support_tickets.unread': { paramsTuple?: []; params?: {} }
+    'support_tickets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.index': { paramsTuple?: []; params?: {} }
     'profile.public_show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.image': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public_slots.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -46,11 +67,19 @@ export type ScannedRoutes = {
     'admin_slots.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'disponibilidade.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_whatsapp.status': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.mensagens': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   HEAD: {
+    'support_tickets.index': { paramsTuple?: []; params?: {} }
+    'support_tickets.mine': { paramsTuple?: []; params?: {} }
+    'support_tickets.unread': { paramsTuple?: []; params?: {} }
+    'support_tickets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.index': { paramsTuple?: []; params?: {} }
     'profile.public_show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.image': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'portfolio.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public_slots.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -60,13 +89,17 @@ export type ScannedRoutes = {
     'admin_slots.index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'disponibilidade.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_whatsapp.status': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'admin_whatsapp.mensagens': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   POST: {
     'auth.login': { paramsTuple?: []; params?: {} }
     'auth.refresh': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
+    'support_tickets.store': { paramsTuple?: []; params?: {} }
+    'support_tickets.reply': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.impersonate': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
+    'portfolio.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public_bookings.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'servicos.store': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'admin_agenda.manual': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -75,6 +108,8 @@ export type ScannedRoutes = {
   }
   PATCH: {
     'auth.change_password': { paramsTuple?: []; params?: {} }
+    'support_tickets.mark_read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'support_tickets.update_status': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin_agenda.update_status': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
   }
   PUT: {
@@ -83,6 +118,7 @@ export type ScannedRoutes = {
     'disponibilidade.update': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   DELETE: {
+    'portfolio.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
     'servicos.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }
   }
 }

@@ -21,6 +21,7 @@ import AdminDashboardController from '#controllers/admin_dashboard_controller'
 import AdminSlotsController from '#controllers/admin_slots_controller'
 import AdminWhatsappController from '#controllers/admin_whatsapp_controller'
 import PortfolioController from '#controllers/portfolio_controller'
+import SupportTicketsController from '#controllers/support_tickets_controller'
 
 router.get('/', () => {
   return { hello: 'world' }
@@ -30,6 +31,21 @@ router.post('/api/login', [AuthController, 'login'])
 router.post('/api/refresh', [AuthController, 'refresh'])
 router.post('/api/logout', [AuthController, 'logout']).use(middleware.jwtAuth())
 router.patch('/api/me/senha', [AuthController, 'changePassword']).use(middleware.jwtAuth())
+
+router.post('/api/support/tickets', [SupportTicketsController, 'store']).use(middleware.jwtAuth())
+router
+  .get('/api/support/tickets', [SupportTicketsController, 'index'])
+  .use(middleware.jwtAuth())
+  .use(middleware.superadmin())
+router.get('/api/support/tickets/mine', [SupportTicketsController, 'mine']).use(middleware.jwtAuth())
+router.get('/api/support/tickets/unread', [SupportTicketsController, 'unread']).use(middleware.jwtAuth())
+router.get('/api/support/tickets/:id', [SupportTicketsController, 'show']).use(middleware.jwtAuth())
+router.post('/api/support/tickets/:id/replies', [SupportTicketsController, 'reply']).use(middleware.jwtAuth())
+router.patch('/api/support/tickets/:id/read', [SupportTicketsController, 'markRead']).use(middleware.jwtAuth())
+router
+  .patch('/api/support/tickets/:id/status', [SupportTicketsController, 'updateStatus'])
+  .use(middleware.jwtAuth())
+  .use(middleware.superadmin())
 
 router.get('/api/me', async ({ authJwt, response }) => {
   if (!authJwt) return response.unauthorized()

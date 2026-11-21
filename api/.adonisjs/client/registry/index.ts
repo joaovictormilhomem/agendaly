@@ -30,6 +30,54 @@ const routes = {
     tokens: [{"old":"/api/me/senha","type":0,"val":"api","end":""},{"old":"/api/me/senha","type":0,"val":"me","end":""},{"old":"/api/me/senha","type":0,"val":"senha","end":""}],
     types: placeholder as Registry['auth.change_password']['types'],
   },
+  'support_tickets.store': {
+    methods: ["POST"],
+    pattern: '/api/support/tickets',
+    tokens: [{"old":"/api/support/tickets","type":0,"val":"api","end":""},{"old":"/api/support/tickets","type":0,"val":"support","end":""},{"old":"/api/support/tickets","type":0,"val":"tickets","end":""}],
+    types: placeholder as Registry['support_tickets.store']['types'],
+  },
+  'support_tickets.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/support/tickets',
+    tokens: [{"old":"/api/support/tickets","type":0,"val":"api","end":""},{"old":"/api/support/tickets","type":0,"val":"support","end":""},{"old":"/api/support/tickets","type":0,"val":"tickets","end":""}],
+    types: placeholder as Registry['support_tickets.index']['types'],
+  },
+  'support_tickets.mine': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/support/tickets/mine',
+    tokens: [{"old":"/api/support/tickets/mine","type":0,"val":"api","end":""},{"old":"/api/support/tickets/mine","type":0,"val":"support","end":""},{"old":"/api/support/tickets/mine","type":0,"val":"tickets","end":""},{"old":"/api/support/tickets/mine","type":0,"val":"mine","end":""}],
+    types: placeholder as Registry['support_tickets.mine']['types'],
+  },
+  'support_tickets.unread': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/support/tickets/unread',
+    tokens: [{"old":"/api/support/tickets/unread","type":0,"val":"api","end":""},{"old":"/api/support/tickets/unread","type":0,"val":"support","end":""},{"old":"/api/support/tickets/unread","type":0,"val":"tickets","end":""},{"old":"/api/support/tickets/unread","type":0,"val":"unread","end":""}],
+    types: placeholder as Registry['support_tickets.unread']['types'],
+  },
+  'support_tickets.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/support/tickets/:id',
+    tokens: [{"old":"/api/support/tickets/:id","type":0,"val":"api","end":""},{"old":"/api/support/tickets/:id","type":0,"val":"support","end":""},{"old":"/api/support/tickets/:id","type":0,"val":"tickets","end":""},{"old":"/api/support/tickets/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['support_tickets.show']['types'],
+  },
+  'support_tickets.reply': {
+    methods: ["POST"],
+    pattern: '/api/support/tickets/:id/replies',
+    tokens: [{"old":"/api/support/tickets/:id/replies","type":0,"val":"api","end":""},{"old":"/api/support/tickets/:id/replies","type":0,"val":"support","end":""},{"old":"/api/support/tickets/:id/replies","type":0,"val":"tickets","end":""},{"old":"/api/support/tickets/:id/replies","type":1,"val":"id","end":""},{"old":"/api/support/tickets/:id/replies","type":0,"val":"replies","end":""}],
+    types: placeholder as Registry['support_tickets.reply']['types'],
+  },
+  'support_tickets.mark_read': {
+    methods: ["PATCH"],
+    pattern: '/api/support/tickets/:id/read',
+    tokens: [{"old":"/api/support/tickets/:id/read","type":0,"val":"api","end":""},{"old":"/api/support/tickets/:id/read","type":0,"val":"support","end":""},{"old":"/api/support/tickets/:id/read","type":0,"val":"tickets","end":""},{"old":"/api/support/tickets/:id/read","type":1,"val":"id","end":""},{"old":"/api/support/tickets/:id/read","type":0,"val":"read","end":""}],
+    types: placeholder as Registry['support_tickets.mark_read']['types'],
+  },
+  'support_tickets.update_status': {
+    methods: ["PATCH"],
+    pattern: '/api/support/tickets/:id/status',
+    tokens: [{"old":"/api/support/tickets/:id/status","type":0,"val":"api","end":""},{"old":"/api/support/tickets/:id/status","type":0,"val":"support","end":""},{"old":"/api/support/tickets/:id/status","type":0,"val":"tickets","end":""},{"old":"/api/support/tickets/:id/status","type":1,"val":"id","end":""},{"old":"/api/support/tickets/:id/status","type":0,"val":"status","end":""}],
+    types: placeholder as Registry['support_tickets.update_status']['types'],
+  },
   'users.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/users',
@@ -54,6 +102,18 @@ const routes = {
     tokens: [{"old":"/api/public/:slug/perfil","type":0,"val":"api","end":""},{"old":"/api/public/:slug/perfil","type":0,"val":"public","end":""},{"old":"/api/public/:slug/perfil","type":1,"val":"slug","end":""},{"old":"/api/public/:slug/perfil","type":0,"val":"perfil","end":""}],
     types: placeholder as Registry['profile.public_show']['types'],
   },
+  'portfolio.public_index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/public/:slug/portfolio',
+    tokens: [{"old":"/api/public/:slug/portfolio","type":0,"val":"api","end":""},{"old":"/api/public/:slug/portfolio","type":0,"val":"public","end":""},{"old":"/api/public/:slug/portfolio","type":1,"val":"slug","end":""},{"old":"/api/public/:slug/portfolio","type":0,"val":"portfolio","end":""}],
+    types: placeholder as Registry['portfolio.public_index']['types'],
+  },
+  'portfolio.image': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/public/portfolio/:id/imagem',
+    tokens: [{"old":"/api/public/portfolio/:id/imagem","type":0,"val":"api","end":""},{"old":"/api/public/portfolio/:id/imagem","type":0,"val":"public","end":""},{"old":"/api/public/portfolio/:id/imagem","type":0,"val":"portfolio","end":""},{"old":"/api/public/portfolio/:id/imagem","type":1,"val":"id","end":""},{"old":"/api/public/portfolio/:id/imagem","type":0,"val":"imagem","end":""}],
+    types: placeholder as Registry['portfolio.image']['types'],
+  },
   'profile.show': {
     methods: ["GET","HEAD"],
     pattern: '/api/admin/:slug/perfil',
@@ -65,6 +125,24 @@ const routes = {
     pattern: '/api/admin/:slug/perfil',
     tokens: [{"old":"/api/admin/:slug/perfil","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/perfil","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/perfil","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/perfil","type":0,"val":"perfil","end":""}],
     types: placeholder as Registry['profile.update']['types'],
+  },
+  'portfolio.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/portfolio',
+    tokens: [{"old":"/api/admin/:slug/portfolio","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/portfolio","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/portfolio","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/portfolio","type":0,"val":"portfolio","end":""}],
+    types: placeholder as Registry['portfolio.index']['types'],
+  },
+  'portfolio.store': {
+    methods: ["POST"],
+    pattern: '/api/admin/:slug/portfolio',
+    tokens: [{"old":"/api/admin/:slug/portfolio","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/portfolio","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/portfolio","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/portfolio","type":0,"val":"portfolio","end":""}],
+    types: placeholder as Registry['portfolio.store']['types'],
+  },
+  'portfolio.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/admin/:slug/portfolio/:id',
+    tokens: [{"old":"/api/admin/:slug/portfolio/:id","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/portfolio/:id","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/portfolio/:id","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/portfolio/:id","type":0,"val":"portfolio","end":""},{"old":"/api/admin/:slug/portfolio/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['portfolio.destroy']['types'],
   },
   'servicos.public_index': {
     methods: ["GET","HEAD"],
@@ -173,6 +251,12 @@ const routes = {
     pattern: '/api/admin/:slug/whatsapp/desconectar',
     tokens: [{"old":"/api/admin/:slug/whatsapp/desconectar","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/whatsapp/desconectar","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/whatsapp/desconectar","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/whatsapp/desconectar","type":0,"val":"whatsapp","end":""},{"old":"/api/admin/:slug/whatsapp/desconectar","type":0,"val":"desconectar","end":""}],
     types: placeholder as Registry['admin_whatsapp.desconectar']['types'],
+  },
+  'admin_whatsapp.mensagens': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/admin/:slug/whatsapp/mensagens',
+    tokens: [{"old":"/api/admin/:slug/whatsapp/mensagens","type":0,"val":"api","end":""},{"old":"/api/admin/:slug/whatsapp/mensagens","type":0,"val":"admin","end":""},{"old":"/api/admin/:slug/whatsapp/mensagens","type":1,"val":"slug","end":""},{"old":"/api/admin/:slug/whatsapp/mensagens","type":0,"val":"whatsapp","end":""},{"old":"/api/admin/:slug/whatsapp/mensagens","type":0,"val":"mensagens","end":""}],
+    types: placeholder as Registry['admin_whatsapp.mensagens']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

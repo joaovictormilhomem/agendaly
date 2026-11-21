@@ -326,6 +326,44 @@ export class ServicoSchema extends BaseModel {
   declare userId: string
 }
 
+export class SupportTicketReplySchema extends BaseModel {
+  static $columns = ['author', 'body', 'createdAt', 'id', 'sequence', 'ticketId'] as const
+  $columns = SupportTicketReplySchema.$columns
+  @column()
+  declare author: string
+  @column()
+  declare body: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare id: string
+  @column({ isPrimary: true })
+  declare sequence: number
+  @column()
+  declare ticketId: string
+}
+
+export class SupportTicketSchema extends BaseModel {
+  static $columns = ['createdAt', 'description', 'id', 'status', 'subject', 'unreadReplyId', 'updatedAt', 'userId'] as const
+  $columns = SupportTicketSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare status: string
+  @column()
+  declare subject: string
+  @column()
+  declare unreadReplyId: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare userId: string
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'id', 'name', 'passwordHash', 'role', 'slug', 'updatedAt'] as const
   $columns = UserSchema.$columns
@@ -345,4 +383,33 @@ export class UserSchema extends BaseModel {
   declare slug: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+}
+
+export class WhatsappMensagenSchema extends BaseModel {
+  static $columns = ['agendamentoId', 'chatId', 'contexto', 'corpo', 'createdAt', 'destinatario', 'erro', 'id', 'messageId', 'status', 'updatedAt', 'userId'] as const
+  $columns = WhatsappMensagenSchema.$columns
+  @column()
+  declare agendamentoId: string
+  @column()
+  declare chatId: string | null
+  @column()
+  declare contexto: string
+  @column()
+  declare corpo: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare destinatario: string
+  @column()
+  declare erro: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare messageId: string | null
+  @column()
+  declare status: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: string
 }

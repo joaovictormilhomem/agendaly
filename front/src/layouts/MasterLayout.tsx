@@ -5,11 +5,12 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 
 const pageTitles: Record<string, string> = {
   dashboard: "Dashboard",
+  suporte: "Chamados de suporte",
 }
 
 export function MasterLayout() {
   const location = useLocation()
-  const segment = location.pathname.split("/").pop() ?? "dashboard"
+  const segment = location.pathname.split("/")[2] ?? "dashboard"
   const title = pageTitles[segment] ?? "Master"
 
   return (

@@ -55,6 +55,102 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'support_tickets.store': {
+    methods: ["POST"]
+    pattern: '/api/support/tickets'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'support_tickets.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/support/tickets'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'support_tickets.mine': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/support/tickets/mine'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'support_tickets.unread': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/support/tickets/unread'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'support_tickets.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/support/tickets/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'support_tickets.reply': {
+    methods: ["POST"]
+    pattern: '/api/support/tickets/:id/replies'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'support_tickets.mark_read': {
+    methods: ["PATCH"]
+    pattern: '/api/support/tickets/:id/read'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'support_tickets.update_status': {
+    methods: ["PATCH"]
+    pattern: '/api/support/tickets/:id/status'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'users.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/users'
@@ -103,6 +199,30 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'portfolio.public_index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/public/:slug/portfolio'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'portfolio.image': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/public/portfolio/:id/imagem'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'profile.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/admin/:slug/perfil'
@@ -122,6 +242,42 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'portfolio.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/portfolio'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'portfolio.store': {
+    methods: ["POST"]
+    pattern: '/api/admin/:slug/portfolio'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'portfolio.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/admin/:slug/portfolio/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { slug: ParamValue; id: ParamValue }
       query: {}
       response: unknown
       errorResponse: unknown
@@ -334,6 +490,18 @@ export interface Registry {
   'admin_whatsapp.desconectar': {
     methods: ["POST"]
     pattern: '/api/admin/:slug/whatsapp/desconectar'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'admin_whatsapp.mensagens': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/admin/:slug/whatsapp/mensagens'
     types: {
       body: {}
       paramsTuple: [ParamValue]

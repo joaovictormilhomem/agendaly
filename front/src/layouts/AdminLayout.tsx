@@ -11,12 +11,13 @@ const pageTitles: Record<string, string> = {
   disponibilidade: "Disponibilidade",
   whatsapp: "WhatsApp",
   personalizar: "Personalizar",
+  ajuda: "Ajuda e suporte",
 }
 
 export function AdminLayout() {
   const { slug } = useParams<{ slug: string }>()
   const location = useLocation()
-  const segment = location.pathname.split("/").pop() ?? "dashboard"
+  const segment = location.pathname.split("/")[3] ?? "dashboard"
   const title = pageTitles[segment] ?? "Painel"
 
   return (

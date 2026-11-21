@@ -8,6 +8,16 @@ export interface ApiDefinition {
     logout: typeof routes['auth.logout']
     changePassword: typeof routes['auth.change_password']
   }
+  supportTickets: {
+    store: typeof routes['support_tickets.store']
+    index: typeof routes['support_tickets.index']
+    mine: typeof routes['support_tickets.mine']
+    unread: typeof routes['support_tickets.unread']
+    show: typeof routes['support_tickets.show']
+    reply: typeof routes['support_tickets.reply']
+    markRead: typeof routes['support_tickets.mark_read']
+    updateStatus: typeof routes['support_tickets.update_status']
+  }
   users: {
     index: typeof routes['users.index']
     impersonate: typeof routes['users.impersonate']
@@ -17,6 +27,13 @@ export interface ApiDefinition {
     publicShow: typeof routes['profile.public_show']
     show: typeof routes['profile.show']
     update: typeof routes['profile.update']
+  }
+  portfolio: {
+    publicIndex: typeof routes['portfolio.public_index']
+    image: typeof routes['portfolio.image']
+    index: typeof routes['portfolio.index']
+    store: typeof routes['portfolio.store']
+    destroy: typeof routes['portfolio.destroy']
   }
   servicos: {
     publicIndex: typeof routes['servicos.public_index']
@@ -51,5 +68,6 @@ export interface ApiDefinition {
     status: typeof routes['admin_whatsapp.status']
     conectar: typeof routes['admin_whatsapp.conectar']
     desconectar: typeof routes['admin_whatsapp.desconectar']
+    mensagens: typeof routes['admin_whatsapp.mensagens']
   }
 }

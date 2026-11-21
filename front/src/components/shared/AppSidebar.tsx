@@ -1,4 +1,6 @@
 import { Link, useLocation, useParams } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import { getUnreadSupportTickets } from "@/api/support"
 import {
   LayoutDashboard,
   Calendar,
@@ -9,6 +11,8 @@ import {
   CalendarHeart,
   MessageCircle,
   KeyRound,
+  Headset,
+  Ticket,
 } from "lucide-react"
 import {
   Sidebar,
@@ -16,6 +20,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarGroup,
@@ -29,6 +34,7 @@ interface NavItem {
   label: string
   href: string
   icon: React.ElementType
+  badge?: string
 }
 
 interface AppSidebarProps {
@@ -73,12 +79,18 @@ export function AppSidebar({ navItems, businessName, businessTagline, initial, s
               const Icon = item.icon
               return (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={active}>
+                  <SidebarMenuButton asChild isActive={active} className={item.badge ? "pr-9" : undefined}>
                     <Link to={item.href}>
                       <Icon />
                       {item.label}
+                      {item.badge && <span className="sr-only"> ({item.badge})</span>}
                     </Link>
                   </SidebarMenuButton>
+                  {item.badge && (
+                    <SidebarMenuBadge aria-hidden="true">
+                      <span className="size-2 rounded-full bg-primary" />
+                    </SidebarMenuBadge>
+                  )}
                 </SidebarMenuItem>
               )
             })}
@@ -115,6 +127,13 @@ export function AppSidebar({ navItems, businessName, businessTagline, initial, s
 export function AdminSidebar() {
   const { slug } = useParams<{ slug: string }>()
   const { user } = useAuth()
+  const location = useLocation()
+  const { data: unread } = useQuery({
+    queryKey: ["support", user?.id, "unread", location.pathname],
+    queryFn: getUnreadSupportTickets,
+    enabled: user?.role === "PROFISSIONAL",
+    retry: false,
+  })
   const base = `/admin/${slug}`
 
   const navItems = [
@@ -124,6 +143,7 @@ export function AdminSidebar() {
     { label: "Disponibilidade", href: `${base}/disponibilidade`, icon: Clock },
     { label: "WhatsApp", href: `${base}/whatsapp`, icon: MessageCircle },
     { label: "Personalizar", href: `${base}/personalizar`, icon: Settings },
+    { label: "Ajuda e suporte", href: `${base}/ajuda`, icon: Headset, badge: unread ? "Nova resposta" : undefined },
   ]
 
   return (
@@ -139,6 +159,7 @@ export function AdminSidebar() {
 export function MasterSidebar() {
   const navItems = [
     { label: "Dashboard", href: "/master/dashboard", icon: LayoutDashboard },
+    { label: "Chamados de suporte", href: "/master/suporte", icon: Ticket },
   ]
   return (
     <AppSidebar

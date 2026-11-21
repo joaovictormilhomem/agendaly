@@ -104,6 +104,11 @@ export default class AuthController {
       return response.unauthorized({ message: 'Refresh token inválido' })
     }
 
+    const expectedUserId = request.input('user_id')
+    if (expectedUserId !== undefined && current.userId !== expectedUserId) {
+      return response.unauthorized({ message: 'Refresh token pertence a outra conta' })
+    }
+
     const session = await AuthSession.find(current.sessionId)
     if (!session || session.revokedAt) {
       return response.unauthorized({ message: 'Sessão inválida' })

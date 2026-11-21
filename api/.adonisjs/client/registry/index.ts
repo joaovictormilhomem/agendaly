@@ -30,6 +30,18 @@ const routes = {
     tokens: [{"old":"/api/me/senha","type":0,"val":"api","end":""},{"old":"/api/me/senha","type":0,"val":"me","end":""},{"old":"/api/me/senha","type":0,"val":"senha","end":""}],
     types: placeholder as Registry['auth.change_password']['types'],
   },
+  'user_notifications.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/me/notifications',
+    tokens: [{"old":"/api/me/notifications","type":0,"val":"api","end":""},{"old":"/api/me/notifications","type":0,"val":"me","end":""},{"old":"/api/me/notifications","type":0,"val":"notifications","end":""}],
+    types: placeholder as Registry['user_notifications.index']['types'],
+  },
+  'user_notifications.read': {
+    methods: ["PATCH"],
+    pattern: '/api/me/notifications/read',
+    tokens: [{"old":"/api/me/notifications/read","type":0,"val":"api","end":""},{"old":"/api/me/notifications/read","type":0,"val":"me","end":""},{"old":"/api/me/notifications/read","type":0,"val":"notifications","end":""},{"old":"/api/me/notifications/read","type":0,"val":"read","end":""}],
+    types: placeholder as Registry['user_notifications.read']['types'],
+  },
   'support_tickets.store': {
     methods: ["POST"],
     pattern: '/api/support/tickets',
@@ -101,6 +113,12 @@ const routes = {
     pattern: '/api/public/:slug/perfil',
     tokens: [{"old":"/api/public/:slug/perfil","type":0,"val":"api","end":""},{"old":"/api/public/:slug/perfil","type":0,"val":"public","end":""},{"old":"/api/public/:slug/perfil","type":1,"val":"slug","end":""},{"old":"/api/public/:slug/perfil","type":0,"val":"perfil","end":""}],
     types: placeholder as Registry['profile.public_show']['types'],
+  },
+  'profile.logo': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/public/perfil-logo/:id',
+    tokens: [{"old":"/api/public/perfil-logo/:id","type":0,"val":"api","end":""},{"old":"/api/public/perfil-logo/:id","type":0,"val":"public","end":""},{"old":"/api/public/perfil-logo/:id","type":0,"val":"perfil-logo","end":""},{"old":"/api/public/perfil-logo/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['profile.logo']['types'],
   },
   'portfolio.public_index': {
     methods: ["GET","HEAD"],

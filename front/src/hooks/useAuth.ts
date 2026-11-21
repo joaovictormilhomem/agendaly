@@ -11,6 +11,11 @@ export function useAuth() {
   const stopImpersonation = useAuthStore((s) => s.stopImpersonation)
 
   async function logout() {
+    if (impersonating) {
+      stopImpersonation()
+      window.location.assign("/master/dashboard")
+      return
+    }
     await logoutApi().catch(() => {})
     logoutStore()
   }

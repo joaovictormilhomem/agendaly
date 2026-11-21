@@ -8,6 +8,10 @@ export interface ApiDefinition {
     logout: typeof routes['auth.logout']
     changePassword: typeof routes['auth.change_password']
   }
+  userNotifications: {
+    index: typeof routes['user_notifications.index']
+    read: typeof routes['user_notifications.read']
+  }
   supportTickets: {
     store: typeof routes['support_tickets.store']
     index: typeof routes['support_tickets.index']
@@ -25,6 +29,7 @@ export interface ApiDefinition {
   }
   profile: {
     publicShow: typeof routes['profile.public_show']
+    logo: typeof routes['profile.logo']
     show: typeof routes['profile.show']
     update: typeof routes['profile.update']
   }

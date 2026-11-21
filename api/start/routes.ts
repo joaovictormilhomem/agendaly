@@ -22,6 +22,7 @@ import AdminSlotsController from '#controllers/admin_slots_controller'
 import AdminWhatsappController from '#controllers/admin_whatsapp_controller'
 import PortfolioController from '#controllers/portfolio_controller'
 import SupportTicketsController from '#controllers/support_tickets_controller'
+import UserNotificationsController from '#controllers/user_notifications_controller'
 
 router.get('/', () => {
   return { hello: 'world' }
@@ -31,6 +32,10 @@ router.post('/api/login', [AuthController, 'login'])
 router.post('/api/refresh', [AuthController, 'refresh'])
 router.post('/api/logout', [AuthController, 'logout']).use(middleware.jwtAuth())
 router.patch('/api/me/senha', [AuthController, 'changePassword']).use(middleware.jwtAuth())
+router
+  .get('/api/me/notifications', [UserNotificationsController, 'index'])
+  .use(middleware.jwtAuth({ trackActivity: false }))
+router.patch('/api/me/notifications/read', [UserNotificationsController, 'read']).use(middleware.jwtAuth())
 
 router.post('/api/support/tickets', [SupportTicketsController, 'store']).use(middleware.jwtAuth())
 router
@@ -76,6 +81,7 @@ router
 
 // Perfil — público
 router.get('/api/public/:slug/perfil', [ProfileController, 'publicShow'])
+router.get('/api/public/perfil-logo/:id', [ProfileController, 'logo'])
 router.get('/api/public/:slug/portfolio', [PortfolioController, 'publicIndex'])
 router.get('/api/public/portfolio/:id/imagem', [PortfolioController, 'image'])
 

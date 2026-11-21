@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { createJSONStorage, persist, type PersistStorage } from "zustand/middleware"
 import type { AuthUser } from "@/types/auth"
 import type { Profissional } from "@/types/profissional"
 
@@ -20,6 +20,33 @@ interface AuthState {
   logout: () => void
   startImpersonation: (target: Profissional, secondaryToken: string) => void
   stopImpersonation: () => void
+}
+
+type StoredAuth = Pick<AuthState, "token" | "user" | "impersonating">
+
+const sharedAuth = createJSONStorage<StoredAuth>(() => localStorage)
+const tabAuth = createJSONStorage<StoredAuth>(() => sessionStorage)
+
+const authStorage: PersistStorage<StoredAuth> = {
+  getItem(name) {
+    const tab = tabAuth?.getItem(name)
+    return tab ?? sharedAuth?.getItem(name) ?? null
+  },
+  setItem(name, value) {
+    if (value.state.impersonating) {
+      tabAuth?.setItem(name, value)
+      return
+    }
+
+    const tab = tabAuth?.getItem(name)
+    tabAuth?.removeItem(name)
+    if (tab && !(tab instanceof Promise) && tab.state.impersonating?.originalToken === value.state.token) return
+    sharedAuth?.setItem(name, value)
+  },
+  removeItem(name) {
+    tabAuth?.removeItem(name)
+    sharedAuth?.removeItem(name)
+  },
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -63,6 +90,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "agendaly-auth",
+      storage: authStorage,
       partialize: (state) => ({
         token: state.token,
         user: state.user,

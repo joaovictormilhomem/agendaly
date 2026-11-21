@@ -4,6 +4,7 @@ import { AdminLayout } from "@/layouts/AdminLayout"
 import { MasterLayout } from "@/layouts/MasterLayout"
 import { LoginPage } from "@/pages/auth/LoginPage"
 import { MasterDashboardPage } from "@/pages/master/MasterDashboardPage"
+import { MasterAccessPage } from "@/pages/master/MasterAccessPage"
 import { MasterTicketsPage } from "@/pages/master/MasterTicketsPage"
 import { TicketDetailPage } from "@/pages/support/TicketDetailPage"
 import { AjudaPage } from "@/pages/admin/AjudaPage"
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/master/dashboard" replace /> },
           { path: "dashboard", element: <MasterDashboardPage /> },
+          { path: "acessar/:slug", element: <MasterAccessPage /> },
           { path: "suporte", element: <MasterTicketsPage /> },
           { path: "suporte/:id", element: <TicketDetailPage staff /> },
         ],

@@ -16,7 +16,7 @@ declare module '@adonisjs/core/http' {
 }
 
 export default class JwtAuthMiddleware {
-  async handle(ctx: HttpContext, next: NextFn) {
+  async handle(ctx: HttpContext, next: NextFn, options?: { trackActivity?: boolean }) {
     const authHeader = ctx.request.header('authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return ctx.response.unauthorized({ message: 'Missing Bearer token' })
@@ -40,8 +40,10 @@ export default class JwtAuthMiddleware {
     const minutesInactive = lastActivity ? now.diff(lastActivity, 'minutes').minutes : Number.POSITIVE_INFINITY
 
     if (minutesInactive > 30) {
-      session.revokedAt = now
-      await session.save()
+      if (options?.trackActivity !== false) {
+        session.revokedAt = now
+        await session.save()
+      }
       return ctx.response.unauthorized({ message: 'Session expired by inactivity' })
     }
 
@@ -50,8 +52,10 @@ export default class JwtAuthMiddleware {
       return ctx.response.unauthorized({ message: 'User not found' })
     }
 
-    session.lastActivityAt = now
-    await session.save()
+    if (options?.trackActivity !== false) {
+      session.lastActivityAt = now
+      await session.save()
+    }
 
     ctx.authJwt = { user, session, claims }
     return next()

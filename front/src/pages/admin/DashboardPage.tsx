@@ -33,8 +33,24 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
 }
 
-function minutesUntil(iso: string) {
-  return Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 60000))
+function formatTimeUntil(iso: string) {
+  const remaining = new Date(iso).getTime() - Date.now()
+  if (remaining <= 0) return "Agora"
+
+  const totalMinutes = Math.floor(remaining / 60_000)
+  if (totalMinutes === 0) return "Em menos de 1 minuto"
+
+  const days = Math.floor(totalMinutes / 1440)
+  const hours = Math.floor((totalMinutes % 1440) / 60)
+  const minutes = totalMinutes % 60
+  const parts = [
+    days > 0 ? `${days} ${days === 1 ? "dia" : "dias"}` : "",
+    hours > 0 ? `${hours} ${hours === 1 ? "hora" : "horas"}` : "",
+    minutes > 0 ? `${minutes} ${minutes === 1 ? "minuto" : "minutos"}` : "",
+  ].filter(Boolean)
+
+  const lastPart = parts.pop()
+  return `Em ${parts.length ? `${parts.join(", ")} e ` : ""}${lastPart}`
 }
 
 interface StatCardProps {
@@ -94,7 +110,6 @@ export function DashboardPage() {
 
   const { user } = useAuth()
   const proximo = data?.proximo_atendimento
-  const mins = proximo ? minutesUntil(proximo.data_hora_inicio) : null
   const showBanner = perfil?.primeira_visita === true
 
   return (
@@ -231,9 +246,9 @@ export function DashboardPage() {
                 <p className="text-sm opacity-85 mb-3">
                   {proximo.servico.nome} - {formatTime(proximo.data_hora_inicio)}
                 </p>
-                <Badge className="gap-1.5 bg-white/20 text-white border-0 hover:bg-white/30">
+                <Badge className="max-w-full gap-1.5 whitespace-normal bg-white/20 text-white border-0 hover:bg-white/30">
                   <Clock className="h-3 w-3" />
-                  Em {mins} {mins === 1 ? "minuto" : "minutos"}
+                  {formatTimeUntil(proximo.data_hora_inicio)}
                 </Badge>
               </CardContent>
             </Card>

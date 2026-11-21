@@ -6,6 +6,7 @@ import Servico from '#models/servico'
 import User from '#models/user'
 import { resolverTotaisServico } from '#helpers/servico_incrementos'
 import NotificacaoAgendamentoService from '#services/notificacao_agendamento_service'
+import { createUserNotification } from '#services/user_notifications_service'
 import SlotEngineService, { invalidateSlotCacheForUser } from '#services/slot_engine_service'
 import { publicAgendarValidator } from '#validators/agenda_public'
 import db from '@adonisjs/lucid/services/db'
@@ -110,6 +111,13 @@ export default class PublicBookingsController {
           },
           { client: trx }
         )
+
+        await createUserNotification(trx, {
+          userId: user.id,
+          kind: 'BOOKING_CREATED',
+          targetId: created.id,
+          description: `${body.cliente_nome} solicitou um horário para ${servico.nome}.`,
+        })
 
         for (const inc of totais.incrementos) {
           const registro = await AgendamentoIncremento.create(

@@ -5,6 +5,7 @@ const hexColor = () => vine.string().regex(/^#[0-9A-Fa-f]{6}$/)
 export const updatePerfilValidator = vine.compile(
   vine.object({
     logo_url: vine.string().url().maxLength(500).optional().nullable(),
+    remover_logo: vine.boolean().optional(),
     nome_exibicao: vine.string().minLength(1).maxLength(150).optional().nullable(),
     tagline: vine.string().maxLength(255).optional().nullable(),
     nome_profissional: vine.string().minLength(1).maxLength(150).optional().nullable(),

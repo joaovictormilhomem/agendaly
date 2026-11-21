@@ -18,4 +18,4 @@ export interface Perfil {
   primeira_visita: boolean
 }
 
-export type PerfilUpdate = Omit<Perfil, "slug" | "primeira_visita">
+export type PerfilUpdate = Omit<Perfil, "slug" | "primeira_visita" | "logo_url">

@@ -1,17 +1,26 @@
-import { Control, useWatch } from "react-hook-form"
+import { useRef } from "react"
+import { Control } from "react-hook-form"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Info } from "lucide-react"
+import { ImagePlus, Info } from "lucide-react"
+import { toast } from "sonner"
 import type { PerfilFormValues } from "@/pages/admin/PersonalizarPage"
 
 interface Props {
   control: Control<PerfilFormValues>
   slug: string
+  logoUrl: string
+  imagePending: boolean
+  disabled: boolean
+  onImageChange: (image: File | null) => void
 }
 
-export function IdentidadeTab({ control, slug }: Props) {
-  const logoUrl = useWatch({ control, name: "logo_url" })
+const acceptedImageTypes = ["image/jpeg", "image/png", "image/webp"]
+
+export function IdentidadeTab({ control, slug, logoUrl, imagePending, disabled, onImageChange }: Props) {
+  const fileInput = useRef<HTMLInputElement>(null)
 
   return (
     <div className="space-y-6">
@@ -20,42 +29,52 @@ export function IdentidadeTab({ control, slug }: Props) {
 
         {/* Logo / Foto de perfil */}
         <div className="space-y-2">
-          <FormField
-            control={control}
-            name="logo_url"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center gap-1.5">
-                  <FormLabel>Logo / Foto de perfil</FormLabel>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>Você pode deixar a letra padrão ou adicionar uma imagem personalizada</TooltipContent>
-                  </Tooltip>
-                </div>
-                <p className="text-xs text-muted-foreground -mt-1">PNG, JPG ou SVG · Recomendado 400 × 400px</p>
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full shrink-0 bg-primary flex items-center justify-center overflow-hidden">
-                    {logoUrl ? (
-                      <img src={logoUrl} alt="preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-xl font-bold font-playfair text-primary-foreground">N</span>
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <FormControl>
-                      <Input placeholder="https://..." {...field} />
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      Cole o link de uma imagem hospedada em qualquer serviço (Instagram, Google Fotos, Imgur, etc.)
-                    </p>
-                    <FormMessage />
-                  </div>
-                </div>
-              </FormItem>
-            )}
-          />
+          <p className="text-sm font-medium">Logo / Foto de perfil</p>
+          <p id="profile-image-help" className="text-xs text-muted-foreground">JPG, PNG ou WebP de até 5 MB. Recomendado 400 × 400 px.</p>
+          <div className="flex items-center gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Prévia da foto de perfil" className="size-full object-cover" />
+              ) : (
+                <span className="font-playfair text-xl font-bold text-primary-foreground">N</span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <input
+                ref={fileInput}
+                type="file"
+                accept={acceptedImageTypes.join(",")}
+                hidden
+                disabled={disabled}
+                onChange={(event) => {
+                  const image = event.currentTarget.files?.[0]
+                  event.currentTarget.value = ""
+                  if (!image) return
+                  if (!acceptedImageTypes.includes(image.type) || image.size > 5 * 1024 * 1024) {
+                    toast.error("Use JPG, PNG ou WebP com até 5 MB.")
+                    return
+                  }
+                  onImageChange(image)
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-describedby="profile-image-help"
+                disabled={disabled}
+                onClick={() => fileInput.current?.click()}
+              >
+                <ImagePlus className="size-4" /> {logoUrl ? "Trocar foto" : "Adicionar foto"}
+              </Button>
+              {logoUrl && (
+                <Button type="button" variant="ghost" size="sm" disabled={disabled} onClick={() => onImageChange(null)}>
+                  Remover foto
+                </Button>
+              )}
+            </div>
+          </div>
+          {imagePending && <p role="status" className="text-xs text-muted-foreground">Clique em Publicar para salvar a alteração.</p>}
         </div>
 
         {/* Nome do negócio */}

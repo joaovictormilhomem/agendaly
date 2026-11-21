@@ -238,6 +238,19 @@ export class LoginThrottleSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class PerfilLogoSchema extends BaseModel {
+  static $columns = ['arquivo', 'contentType', 'id', 'userId'] as const
+  $columns = PerfilLogoSchema.$columns
+  @column()
+  declare arquivo: Buffer
+  @column()
+  declare contentType: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare userId: string
+}
+
 export class PortfolioImagenSchema extends BaseModel {
   static $columns = ['arquivo', 'contentType', 'createdAt', 'id', 'ordem', 'updatedAt', 'userId'] as const
   $columns = PortfolioImagenSchema.$columns
@@ -360,6 +373,25 @@ export class SupportTicketSchema extends BaseModel {
   declare unreadReplyId: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+  @column()
+  declare userId: string
+}
+
+export class UserNotificationSchema extends BaseModel {
+  static $columns = ['createdAt', 'description', 'id', 'kind', 'readAt', 'targetId', 'userId'] as const
+  $columns = UserNotificationSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare kind: string
+  @column.dateTime()
+  declare readAt: DateTime | null
+  @column()
+  declare targetId: string
   @column()
   declare userId: string
 }

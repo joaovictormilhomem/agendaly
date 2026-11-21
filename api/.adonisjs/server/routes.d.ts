@@ -8,6 +8,8 @@ export type ScannedRoutes = {
     'auth.refresh': { paramsTuple?: []; params?: {} }
     'auth.logout': { paramsTuple?: []; params?: {} }
     'auth.change_password': { paramsTuple?: []; params?: {} }
+    'user_notifications.index': { paramsTuple?: []; params?: {} }
+    'user_notifications.read': { paramsTuple?: []; params?: {} }
     'support_tickets.store': { paramsTuple?: []; params?: {} }
     'support_tickets.index': { paramsTuple?: []; params?: {} }
     'support_tickets.mine': { paramsTuple?: []; params?: {} }
@@ -20,6 +22,7 @@ export type ScannedRoutes = {
     'users.impersonate': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'users.store': { paramsTuple?: []; params?: {} }
     'profile.public_show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'profile.logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolio.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'portfolio.image': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -48,12 +51,14 @@ export type ScannedRoutes = {
     'admin_whatsapp.mensagens': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   GET: {
+    'user_notifications.index': { paramsTuple?: []; params?: {} }
     'support_tickets.index': { paramsTuple?: []; params?: {} }
     'support_tickets.mine': { paramsTuple?: []; params?: {} }
     'support_tickets.unread': { paramsTuple?: []; params?: {} }
     'support_tickets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.index': { paramsTuple?: []; params?: {} }
     'profile.public_show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'profile.logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolio.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'portfolio.image': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -70,12 +75,14 @@ export type ScannedRoutes = {
     'admin_whatsapp.mensagens': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
   }
   HEAD: {
+    'user_notifications.index': { paramsTuple?: []; params?: {} }
     'support_tickets.index': { paramsTuple?: []; params?: {} }
     'support_tickets.mine': { paramsTuple?: []; params?: {} }
     'support_tickets.unread': { paramsTuple?: []; params?: {} }
     'support_tickets.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'users.index': { paramsTuple?: []; params?: {} }
     'profile.public_show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'profile.logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'portfolio.public_index': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'portfolio.image': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'profile.show': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -108,6 +115,7 @@ export type ScannedRoutes = {
   }
   PATCH: {
     'auth.change_password': { paramsTuple?: []; params?: {} }
+    'user_notifications.read': { paramsTuple?: []; params?: {} }
     'support_tickets.mark_read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'support_tickets.update_status': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin_agenda.update_status': { paramsTuple: [ParamValue,ParamValue]; params: {'slug': ParamValue,'id': ParamValue} }

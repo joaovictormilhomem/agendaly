@@ -3,8 +3,15 @@ import db from '@adonisjs/lucid/services/db'
 import vine from '@vinejs/vine'
 import { randomUUID } from 'node:crypto'
 import { vineUuidLike } from '#validators/common'
+import { createUserNotification } from '#services/user_notifications_service'
 
 const statuses = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOLVED'] as const
+const statusLabels: Record<(typeof statuses)[number], string> = {
+  OPEN: 'Aberto',
+  IN_PROGRESS: 'Em atendimento',
+  WAITING_CUSTOMER: 'Aguardando cliente',
+  RESOLVED: 'Resolvido',
+}
 
 const ticketValidator = vine.compile(
   vine.object({
@@ -131,7 +138,7 @@ export default class SupportTicketsController {
         body,
       })
 
-      let status = ticket.status
+      let status = ticket.status as (typeof statuses)[number]
       if (isStaff && status === 'OPEN') status = 'IN_PROGRESS'
       if (!isStaff && status === 'WAITING_CUSTOMER') status = 'IN_PROGRESS'
       if (!isStaff && status === 'RESOLVED') status = 'OPEN'
@@ -141,6 +148,14 @@ export default class SupportTicketsController {
         updated_at: trx.raw('clock_timestamp()'),
         ...(isStaff ? { unread_reply_id: replyId } : {}),
       })
+      if (status !== ticket.status) {
+        await createUserNotification(trx, {
+          userId: ticket.user_id,
+          kind: 'SUPPORT_STATUS_CHANGED',
+          targetId: id,
+          description: `“${ticket.subject}” mudou para ${statusLabels[status]}.`,
+        })
+      }
       return true
     })
     return saved ? response.created({}) : response.notFound()
@@ -149,9 +164,22 @@ export default class SupportTicketsController {
   async updateStatus({ params, request, response }: HttpContext) {
     const { id } = await idValidator.validate(params)
     const { status } = await request.validateUsing(statusValidator)
-    const updated = await db.from('support_tickets').where('id', id).update({
-      status,
-      updated_at: db.raw('clock_timestamp()'),
+    const updated = await db.transaction(async (trx) => {
+      const ticket = await trx.from('support_tickets').where('id', id).forUpdate().first()
+      if (!ticket) return false
+      if (ticket.status === status) return true
+
+      await trx.from('support_tickets').where('id', id).update({
+        status,
+        updated_at: trx.raw('clock_timestamp()'),
+      })
+      await createUserNotification(trx, {
+        userId: ticket.user_id,
+        kind: 'SUPPORT_STATUS_CHANGED',
+        targetId: id,
+        description: `“${ticket.subject}” mudou para ${statusLabels[status]}.`,
+      })
+      return true
     })
     return updated ? response.noContent() : response.notFound()
   }

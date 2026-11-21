@@ -1,6 +1,6 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { useQuery, useMutation } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -20,7 +20,6 @@ import { ContatoTab } from "@/components/personalizar/ContatoTab"
 import { TemaTab } from "@/components/personalizar/TemaTab"
 
 const perfilSchema = z.object({
-  logo_url: z.string().url({ message: "URL inválida" }).or(z.literal("")).optional().default(""),
   nome_exibicao: z.string().min(1, { message: "Nome do negócio é obrigatório" }),
   tagline: z.string().optional().default(""),
   nome_profissional: z.string().min(1, { message: "Nome da profissional é obrigatório" }),
@@ -47,6 +46,13 @@ export type PerfilFormValues = z.infer<typeof perfilSchema>
 
 export function PersonalizarPage() {
   const { slug } = useParams<{ slug: string }>()
+  return <PersonalizarForm key={slug} slug={slug ?? ""} />
+}
+
+function PersonalizarForm({ slug }: { slug: string }) {
+  const queryClient = useQueryClient()
+  const [imagem, setImagem] = useState<File | null>()
+  const [preview, setPreview] = useState("")
   const { data, isLoading } = useQuery({
     queryKey: ["perfil", slug],
     queryFn: () => getPerfil(slug!),
@@ -56,7 +62,6 @@ export function PersonalizarPage() {
   const form = useForm<PerfilFormValues>({
     resolver: zodResolver(perfilSchema),
     defaultValues: {
-      logo_url: "",
       nome_exibicao: "",
       tagline: "",
       nome_profissional: "",
@@ -77,7 +82,6 @@ export function PersonalizarPage() {
   useEffect(() => {
     if (data) {
       form.reset({
-        logo_url: data.logo_url ?? "",
         nome_exibicao: data.nome_exibicao ?? "",
         tagline: data.tagline ?? "",
         nome_profissional: data.nome_profissional ?? "",
@@ -96,13 +100,30 @@ export function PersonalizarPage() {
     }
   }, [data, form])
 
+  useEffect(() => {
+    if (!imagem) {
+      setPreview("")
+      return
+    }
+    const url = URL.createObjectURL(imagem)
+    setPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [imagem])
+
   const { mutate: publicar, isPending } = useMutation({
-    mutationFn: (values: PerfilFormValues) => updatePerfil(slug!, values),
-    onSuccess: () => toast.success("Página publicada com sucesso!"),
+    mutationFn: (values: PerfilFormValues) => updatePerfil(slug, values, imagem),
+    onSuccess: (perfil) => {
+      queryClient.setQueryData(["perfil", slug], perfil)
+      void queryClient.invalidateQueries({ queryKey: ["perfil-pub", slug] })
+      setImagem(undefined)
+      toast.success("Página publicada com sucesso!")
+    },
     onError: () => toast.error("Erro ao publicar. Tente novamente."),
   })
 
-  const onSubmit = (values: PerfilFormValues) => publicar(values)
+  const onSubmit = (values: PerfilFormValues) => {
+    if (!isPending) publicar(values)
+  }
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -161,7 +182,14 @@ export function PersonalizarPage() {
 
             <div className="max-w-2xl">
               <TabsContent value="identidade">
-                <IdentidadeTab control={form.control} slug={slug ?? ""} />
+                <IdentidadeTab
+                  control={form.control}
+                  slug={slug}
+                  logoUrl={imagem === null ? "" : imagem ? preview : data?.logo_url ?? ""}
+                  imagePending={imagem !== undefined}
+                  disabled={isPending || isLoading}
+                  onImageChange={setImagem}
+                />
               </TabsContent>
 
               <TabsContent value="hero">

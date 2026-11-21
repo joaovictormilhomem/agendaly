@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -25,9 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { listProfissionais, createProfissional, impersonateProfissional } from "@/api/master/profissionais"
-import { useAuth } from "@/hooks/useAuth"
-import type { CreateProfissionalRequest, Profissional } from "@/types/profissional"
+import { listProfissionais, createProfissional } from "@/api/master/profissionais"
+import type { CreateProfissionalRequest } from "@/types/profissional"
 
 const createSchema = z.object({
   nome: z.string().min(2, "Nome obrigatório"),
@@ -66,9 +64,7 @@ function maskPhone(value: string) {
 }
 
 export function MasterDashboardPage() {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { startImpersonation } = useAuth()
   const [search, setSearch] = useState("")
   const [open, setOpen] = useState(false)
 
@@ -83,15 +79,6 @@ export function MasterDashboardPage() {
       queryClient.invalidateQueries({ queryKey: ["master-profissionais"] })
       setOpen(false)
       reset()
-    },
-  })
-
-  const impersonateMutation = useMutation({
-    mutationFn: (profissional: Profissional) => impersonateProfissional(profissional.slug),
-    onSuccess: ({ token }, profissional) => {
-      startImpersonation(profissional, token)
-      queryClient.clear()
-      navigate(`/admin/${profissional.slug}/dashboard`)
     },
   })
 
@@ -274,11 +261,12 @@ export function MasterDashboardPage() {
                       size="sm"
                       variant="outline"
                       className="gap-1.5 text-xs"
-                      disabled={impersonateMutation.isPending}
-                      onClick={() => impersonateMutation.mutate(p)}
+                      asChild
                     >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Acessar Painel
+                      <a href={`/master/acessar/${encodeURIComponent(p.slug)}`} rel="noopener">
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Acessar Painel
+                      </a>
                     </Button>
                   </TableCell>
                 </TableRow>

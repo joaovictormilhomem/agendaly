@@ -17,4 +17,5 @@ export const controllers = {
   Servicos: () => import('#controllers/servicos_controller'),
   Users: () => import('#controllers/users_controller'),
   SupportTickets: () => import('#controllers/support_tickets_controller'),
+  UserNotifications: () => import('#controllers/user_notifications_controller'),
 }

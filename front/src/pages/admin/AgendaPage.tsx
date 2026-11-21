@@ -1,15 +1,16 @@
 import { useMemo, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { isAxiosError } from "axios"
 import { toast } from "sonner"
-import { addDays, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns"
+import { addDays, eachDayOfInterval, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import type { DayButtonProps } from "react-day-picker"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card"
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,11 +24,33 @@ import {
 import { StatusChip } from "@/components/shared/StatusChip"
 import { NovoAgendamentoDialog } from "@/components/agenda/NovoAgendamentoDialog"
 import { DetalhesAgendamentoDialog } from "@/components/agenda/DetalhesAgendamentoDialog"
-import { getAgendaDay, getAgendaRange, patchAgendamentoStatus } from "@/api/admin/agenda"
+import { getAgendaDay, getAgendaRange, getAgendamento, patchAgendamentoStatus } from "@/api/admin/agenda"
 import { cn } from "@/lib/utils"
 import type { AgendaListResponse, Agendamento } from "@/types/agenda"
 
 type ViewMode = "dia" | "semana" | "mes"
+
+const agendaDate = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Sao_Paulo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+})
+
+function AgendaDayButton(props: DayButtonProps) {
+  if (!props.modifiers.hasBooking) return <CalendarDayButton {...props} />
+
+  return (
+    <CalendarDayButton
+      {...props}
+      aria-label={`${props["aria-label"]}, com agendamento`}
+      className={cn(
+        props.className,
+        "relative after:pointer-events-none after:absolute after:bottom-1 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-primary data-[selected-single=true]:after:bg-current"
+      )}
+    />
+  )
+}
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
@@ -108,12 +131,36 @@ function AgendamentoCard({ item, showDate, onDetalhes, onCancelar }: Agendamento
 
 export function AgendaPage() {
   const { slug } = useParams<{ slug: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const linkedId = searchParams.get("agendamento")
   const qc = useQueryClient()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [calendarMonth, setCalendarMonth] = useState(() => startOfMonth(selectedDate))
   const [viewMode, setViewMode] = useState<ViewMode>("dia")
   const [novoOpen, setNovoOpen] = useState(false)
   const [detalhesItem, setDetalhesItem] = useState<Agendamento | null>(null)
   const [cancelarItem, setCancelarItem] = useState<Agendamento | null>(null)
+  const linkedBooking = useQuery({
+    queryKey: ["agenda-detail", slug, linkedId],
+    queryFn: () => getAgendamento(slug!, linkedId!),
+    enabled: Boolean(slug && linkedId),
+    retry: false,
+  })
+  const detail = linkedId ? linkedBooking.data ?? null : detalhesItem
+
+  function selectDate(date: Date) {
+    setSelectedDate(date)
+    setCalendarMonth(startOfMonth(date))
+  }
+
+  function closeDetails() {
+    setDetalhesItem(null)
+    if (linkedId) {
+      const next = new URLSearchParams(searchParams)
+      next.delete("agendamento")
+      setSearchParams(next, { replace: true })
+    }
+  }
 
   const range = useMemo(() => {
     if (viewMode === "dia") {
@@ -146,6 +193,24 @@ export function AgendaPage() {
   })
 
   const agendamentos = agendaResp?.agendamentos ?? []
+  const calendarStart = startOfWeek(startOfMonth(calendarMonth), { locale: ptBR })
+  const calendarEnd = endOfWeek(endOfMonth(calendarMonth), { locale: ptBR })
+  const { data: calendarAgenda } = useQuery({
+    queryKey: ["agenda", slug, "calendar", format(calendarStart, "yyyy-MM-dd"), format(calendarEnd, "yyyy-MM-dd")],
+    queryFn: () => getAgendaRange(slug!, calendarStart, calendarEnd),
+    enabled: Boolean(slug),
+    staleTime: 0,
+  })
+  const bookingRanges = calendarAgenda?.agendamentos
+    .filter((item) => item.status !== "CANCELADO")
+    .map((item) => ({
+      start: agendaDate.format(new Date(item.data_hora_inicio)),
+      end: agendaDate.format(new Date(new Date(item.data_hora_fim).getTime() - 1)),
+    })) ?? []
+  const bookedDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd }).filter((day) => {
+    const key = format(day, "yyyy-MM-dd")
+    return bookingRanges.some(({ start, end }) => start <= key && key <= end)
+  })
 
   const { mutate: confirmarCancelamento, isPending: canceling } = useMutation({
     mutationFn: ({ id }: { id: string }) => patchAgendamentoStatus(slug!, id, { status: "CANCELADO" }),
@@ -236,12 +301,16 @@ export function AgendaPage() {
         <Card className="border border-border p-1 w-fit bg-white">
           <Calendar
             mode="single"
+            month={calendarMonth}
+            onMonthChange={setCalendarMonth}
             selected={selectedDate}
             onSelect={(d) => {
               if (!d) return
-              setSelectedDate(d)
+              selectDate(d)
               setViewMode("dia")
             }}
+            modifiers={{ hasBooking: bookedDays }}
+            components={{ DayButton: AgendaDayButton }}
             locale={ptBR}
             className="p-3 bg-white"
           />
@@ -271,7 +340,7 @@ export function AgendaPage() {
                     variant="outline"
                     className="h-8 w-8 rounded-full"
                     aria-label="Dia anterior"
-                    onClick={() => setSelectedDate((date) => addDays(date, -1))}
+                    onClick={() => selectDate(addDays(selectedDate, -1))}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -280,7 +349,7 @@ export function AgendaPage() {
                     size="sm"
                     variant="outline"
                     className="h-8 rounded-full"
-                    onClick={() => setSelectedDate(new Date())}
+                    onClick={() => selectDate(new Date())}
                   >
                     Hoje
                   </Button>
@@ -290,7 +359,7 @@ export function AgendaPage() {
                     variant="outline"
                     className="h-8 w-8 rounded-full"
                     aria-label="Próximo dia"
-                    onClick={() => setSelectedDate((date) => addDays(date, 1))}
+                    onClick={() => selectDate(addDays(selectedDate, 1))}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -352,11 +421,20 @@ export function AgendaPage() {
         initialDate={selectedDate}
       />
 
+      {linkedId && linkedBooking.isPending && (
+        <p role="status" className="text-sm text-muted-foreground">Carregando agendamento…</p>
+      )}
+      {linkedId && linkedBooking.isError && (
+        <div className="flex items-center gap-2">
+          <p role="alert" className="text-sm text-destructive">Não foi possível abrir o agendamento.</p>
+          <Button variant="ghost" onClick={closeDetails}>Dispensar</Button>
+        </div>
+      )}
       <DetalhesAgendamentoDialog
-        agendamento={detalhesItem}
-        open={!!detalhesItem}
+        agendamento={detail}
+        open={!!detail}
         onOpenChange={(o) => {
-          if (!o) setDetalhesItem(null)
+          if (!o) closeDetails()
         }}
         slug={slug!}
       />

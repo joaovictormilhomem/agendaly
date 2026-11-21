@@ -55,6 +55,30 @@ export interface Registry {
       errorResponse: unknown
     }
   }
+  'user_notifications.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/me/notifications'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'user_notifications.read': {
+    methods: ["PATCH"]
+    pattern: '/api/me/notifications/read'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
   'support_tickets.store': {
     methods: ["POST"]
     pattern: '/api/support/tickets'
@@ -194,6 +218,18 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { slug: ParamValue }
+      query: {}
+      response: unknown
+      errorResponse: unknown
+    }
+  }
+  'profile.logo': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/public/perfil-logo/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
       query: {}
       response: unknown
       errorResponse: unknown
